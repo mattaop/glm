@@ -17,13 +17,7 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
   sigma2 <- sum((Y - X%*%betahat)^2) / (nrow(X) - ncol(X))
   std <- sqrt(diag(solve(crossprod(X))) * sigma2)
   t_value <- betahat/std
-  for(i in 0:(ncol(X))){
-    C = c(ncol(X))
-    C[i] = 1
-    c_jj = solve(t(X)%*%X)
-    p_value <- t(betahat)*solve(sigma2*c_jj)%*%betahat
-  }
-
+  p_value =  pnorm(-abs(betahat)/std)  * 2
   est <- list(terms = terms, model = mf, betahat = betahat, residuals=residuals, std = std, t_value=t_value, p_value=p_value)
 
   # Store call and formula used
@@ -77,6 +71,7 @@ summary.mylm <- function(object, ...){
 
 plot.mylm <- function(object, ...){
   # Code here is used when plot(object) is used on objects of class "mylm"
+  plot(object$residuals)
 
 }
 

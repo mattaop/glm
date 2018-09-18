@@ -1,4 +1,5 @@
---- 
+
+'--- 
 title: "TMA4315: Compulsory exercise 1 (title)" 
 subtitle: "Group 0: Name1, Name2 (subtitle)" 
 date: "`r format(Sys.time(), '%d.%m.%Y')`" # the current date, can be regular text as well
@@ -90,7 +91,12 @@ summary(model1)
 summary(model1b)
 
 ```
+```{r}
+# some R code for part 2b)
+plot(model1)
+plot(model1b)
 
+```
 
 
 
