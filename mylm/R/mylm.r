@@ -24,6 +24,9 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
   est$call <- match.call()
   est$formula <- formula
 
+  # Store response
+  est$fitted = Y
+
   # Set class name. This is very important!
   class(est) <- 'mylm'
 
@@ -38,7 +41,6 @@ print.mylm <- function(object, ...){
   print.default(object$call)
   cat('\nCoefficients:\n')
   print.default(t(object$betahat), digits=5)
-  #format
 }
 
 summary.mylm <- function(object, ...){
@@ -71,7 +73,11 @@ summary.mylm <- function(object, ...){
 
 plot.mylm <- function(object, ...){
   # Code here is used when plot(object) is used on objects of class "mylm"
-  plot(object$residuals)
+  # plot(object$residuals)
+  print(dim(object$residuals))
+  print(dim(object$fitted))
+  plot(object$fitted, object$residuals, ylab="Residuals", xlab="Fitted", main="Residual vs Fitted")
+  abline(0, 0)
 
 }
 

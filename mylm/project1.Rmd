@@ -86,13 +86,15 @@ print(model1b)
 
 ```
 ```{r}
-# some R code for part 2b)
+# some R code for part 2b
+library(mylm)
 summary(model1)
 summary(model1b)
 
 ```
 ```{r}
-# some R code for part 2b)
+# some R code for part 2c)
+library(mylm)
 plot(model1)
 plot(model1b)
 
