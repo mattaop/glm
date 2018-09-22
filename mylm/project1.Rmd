@@ -95,6 +95,7 @@ summary(model1b)
 ```{r}
 # some R code for part 2c)
 library(mylm)
+library(ggplot2)
 plot(model1)
 plot(model1b)
 
