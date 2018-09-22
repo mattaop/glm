@@ -11,21 +11,31 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
 
   # Add code here to calculate coefficients, residuals, fitted values, etc...
   # and store the results in the list est
-  betahat = solve(t(X) %*% X) %*% t(X) %*% Y
-  H = X%*%solve((t(X)%*%X))%*%t(X)
-  residuals = (diag(nrow(H))-H)%*%Y
+  betahat <- solve(t(X) %*% X) %*% t(X) %*% Y
+  H <- X%*%solve((t(X)%*%X))%*%t(X)
+  residuals <- (diag(nrow(H))-H)%*%Y
   sigma2 <- sum((Y - X%*%betahat)^2) / (nrow(X) - ncol(X))
   std <- sqrt(diag(solve(crossprod(X))) * sigma2)
   t_value <- betahat/std
-  p_value =  pnorm(-abs(betahat)/std)  * 2
-  est <- list(terms = terms, model = mf, betahat = betahat, residuals=residuals, std = std, t_value=t_value, p_value=p_value)
+  p_value <- pnorm(-abs(betahat)/std)  * 2
+  est <- list(terms = terms, model = mf, betahat = betahat, residuals=residuals, std = t(std), t_value=t_value, p_value=p_value)
 
   # Store call and formula used
   est$call <- match.call()
   est$formula <- formula
 
   # Store response
-  est$fitted.values = X%*%betahat
+  est$fitted.values <- X%*%betahat
+
+  # R_squared
+  rss <- sum(residuals ^ 2)  ## residual sum of squares
+  tss <- sum((Y - mean(Y)) ^ 2)  ## total sum of squares
+  R_squared <- 1 - rss/tss
+  n = length(Y)
+  p = length(betahat)-1
+  adj_R_squared <- 1-(1-R_squared)*(n-1)/(n-p-1)
+  est$R_squared <- R_squared
+  est$adj_R_squared <- adj_R_squared
 
   # Set class name. This is very important!
   class(est) <- 'mylm'
@@ -63,17 +73,22 @@ summary.mylm <- function(object, ...){
   cat('Estimate')
   print.default(object$betahat, digits=5)
   cat('\nStd. Error')
-  print.default(object$std, digits = 4)
+  print.default(t(object$std), digits = 4)
   cat('\nt-value')
   print.default(object$t_value, digits=4)
   cat('\nPr(>|t|)')
   print.default(object$p_value)
 
+  # R_squared
+  cat('\nR-squared:')
+  print.default(object$R_squared)
+  cat('Adjusted R-squared:')
+  print.default(object$adj_R_squared)
+
 }
 
 plot.mylm <- function(object, ...){
   # Code here is used when plot(object) is used on objects of class "mylm"
-  # plot(object$residuals)
   plot(object$fitted, object$residuals, ylab="Residuals", xlab="Fitted", main="Residual vs Fitted")
 
 }
