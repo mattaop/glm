@@ -79,9 +79,9 @@ _italic_
 ```{r}
 # some R code for part 2a)
 library(mylm)
-model1 <- mylm(wages ~ education, data = SLID)
+model1 <- mylm(wages ~ education+age, data = SLID)
 print(model1)
-model1b <- lm(wages ~ education, data = SLID)
+model1b <- lm(wages ~ education+age, data = SLID)
 print(model1b)
 
 ```
