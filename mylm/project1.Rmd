@@ -1,10 +1,11 @@
 ---
 output:
-  pdf_document: default
+  pdf_document: 
+    latex_engine: xelatex
   html_document: default
 ---
 
-'--- 
+--- 
 title: "TMA4315: Compulsory exercise 1 (title)" 
 subtitle: "Group 0: Name1, Name2 (subtitle)" 
 date: "`r format(Sys.time(), '%d.%m.%Y')`" # the current date, can be regular text as well
@@ -39,7 +40,7 @@ To get a pdf file, make comments of the lines with the "html_document" informati
 Your answer for part 1a)
 
 ```{r, include=FALSE}
-install.packages("car")
+install.packages("car", repos = "http://cran.us.r-project.org")
 library(car)
 data(SLID, package = "carData")
 SLID <- SLID[complete.cases(SLID), ]
@@ -99,8 +100,8 @@ summary(model1)
 summary(model1b)
 ```
 The intercept estimate as shown in the print out is 4.97169 and the estimated standard error is 0.53429. For the regression coefficient the estimate is 0.79231 and the estimated standard error is 0.03906. Using a Z-test, we get:
-$$P(Z \leq |z|)=2 \cdot \Phi(-|Z|), \hspace{1cm} Z=\frac{x-\mu}{\sigma} $$
-In our case, the $H_0$ hypotheses is that $\mu$ is zeros, and thus we get $Z=x/sigma}$:
+$$ P(Z \leq |z|)=2 \cdot \Phi(-|Z|), \hspace{1cm} Z=\frac{x-\mu}{\sigma} $$
+In our case, the $H_0$ hypotheses is that $\mu$ is zeros, and thus we get $Z=x/ \sigma$:
 ```{r}
 cat("Z-values for the regression coefficients: ")
 print.default(model1$z_value)
