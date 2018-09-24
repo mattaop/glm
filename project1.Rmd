@@ -1,0 +1,111 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+
+'--- 
+title: "TMA4315: Compulsory exercise 1 (title)" 
+subtitle: "Group 0: Name1, Name2 (subtitle)" 
+date: "`r format(Sys.time(), '%d.%m.%Y')`" # the current date, can be regular text as well
+output: # 3rd letter intentation hierarchy
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 2
+  # pdf_document:
+  #  toc: false
+  #  toc_depth: 2
+
+---
+
+```{r setup, include = FALSE}
+library(formatR)
+showsol <- FALSE
+library(knitr)
+opts_chunk$set(tidy.opts = list(width.cutoff = 68), tidy = TRUE, warning = FALSE, error = FALSE, message = FALSE, echo = TRUE)
+```
+
+# Part 1
+
+**Bold**
+
+_italic_
+
+To get a pdf file, make comments of the lines with the "html_document" information, and make the lines with the "pdf_document" information regular, and vice versa.
+
+## a)
+
+Your answer for part 1a)
+
+```{r setup, include=FALSE}
+install.packages("car")
+library(car)
+data(SLID, package = "carData")
+SLID <- SLID[complete.cases(SLID), ]
+
+```
+
+```{r}
+# some R code for part 1a)
+library(GGally)
+ggpairs(SLID, lower = list(combo = wrap(ggally_facethist, binwidth = 0.5)))
+```
+
+From the top row we can see that the wage variable shows a noticeable correlation with education, age and sex. Language on the other hand doesn't seem to have a large impact on the wages. One can see that people with high level (20) of education are distributed over the whole span of wages, but low educated people are centred around low wages, with very few or none at high level of wages.
+
+The age correlates to wages in that there are people from all age categories that have low wages, but that people are more likely to have a higher wage around age 40. Visually, it seems that the average wage decreases with every age bracket above 40, such that those aged 60 have a lower average wage than 50-year-olds, and so forth. The correlation is posivite and substantial, so the overall trend is that higher age correlates to higher wages. There is a correlation between age and education, in that the education level decreases as the age increases. It is a known fact that the average education level have increased over the last 50 years, which correlates with the data set. 
+
+As for the sex variable, males have a somewhat higher median wage, and the first and third wage quartiles in males are respectively higher than those in females. The wage outliers among males also tend to earn more than those in females, suggesting that that the upper few percents of earners will tend to be male.
+
+First we assume that there is a linear relationship between the covariates, ie. the relationship can be expressed as:
+
+
+$$\bf{Y} = \bf{X} \bf{\beta} + \bf{\varepsilon}$$
+
+In order to perform a multiple linear regression analysis, we must make the following assumptions:
+First, the response, which is wage, is a linear combination of the covariates, and errors are additive onto the linear combination, i.e. $\bf{Y} = \bf{X} \bf{\beta} + \bf{\varepsilon}$. Second, that we have homoscedastic error variance and uncorrelated errors, i.e. Cov(ε)=$σ^2\bf{I}$, Cov($ε_i,ε_j$)=0. For this model, this means that along age, sex, language and education, the variance in wage is the same for any observation, or set of observations.
+
+In order for the model to also be "normal", 
+.
+
+Additivity of errors: Y=Xβ+ε
+
+Additionally, 
+Assumption of normality: ε∼N(0,σ2I)
+
+# Part 2
+
+**Bold**
+
+_italic_
+
+
+
+```{r}
+# some R code for part 2a)
+library(mylm)
+model1 <- mylm(wages ~ education+age, data = SLID)
+print(model1)
+model1b <- lm(wages ~ education+age, data = SLID)
+print(model1b)
+
+```
+```{r}
+# some R code for part 2b
+library(mylm)
+summary(model1)
+summary(model1b)
+
+```
+```{r}
+# some R code for part 2c)
+library(mylm)
+library(ggplot2)
+plot(model1)
+plot(model1b)
+
+```
+
+
+

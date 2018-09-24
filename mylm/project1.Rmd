@@ -1,7 +1,6 @@
 ---
 output:
-  pdf_document: 
-    latex_engine: xelatex
+  pdf_document: default
   html_document: default
 ---
 
@@ -39,8 +38,8 @@ To get a pdf file, make comments of the lines with the "html_document" informati
 
 Your answer for part 1a)
 
-```{r, include=FALSE}
-install.packages("car", repos = "http://cran.us.r-project.org")
+```{r setup, include=FALSE}
+install.packages("car")
 library(car)
 data(SLID, package = "carData")
 SLID <- SLID[complete.cases(SLID), ]
@@ -53,26 +52,27 @@ library(GGally)
 ggpairs(SLID, lower = list(combo = wrap(ggally_facethist, binwidth = 0.5)))
 ```
 
-From the top row we can see that there is a noticeable corrolation between wages, and the education, age and sex. Language on the other hand doesn't seem to have a large impact on the wages. One can see that people with high level (20) of education are distributed over the whole span of wages, but low educated people are centred around low wages, with very few or none at high level of wages.
+From the top row we can see that the wage variable shows a noticeable correlation with education, age and sex. Language on the other hand doesn't seem to have a large impact on the wages. One can see that people with high level (20) of education are distributed over the whole span of wages, but low educated people are centred around low wages, with very few or none at high level of wages.
 
-The age corrolates to wages in that there is people from all age categories that have low wages, but the there is more likley to have a higher wage around age 40, and decreasing when younger or older.
+The age correlates to wages in that there are people from all age categories that have low wages, but that people are more likely to have a higher wage around age 40. Visually, it seems that the average wage decreases with every age bracket above 40, such that those aged 60 have a lower average wage than 50-year-olds, and so forth. The correlation is posivite and substantial, so the overall trend is that higher age correlates to higher wages. There is a correlation between age and education, in that the education level decreases as the age increases. It is a known fact that the average education level have increased over the last 50 years, which correlates with the data set. 
 
-
-There is a corrolation between age and education, in that the education level decreases as the age increases. There is a known fact that the average education level have increased over the last 50 years, which corrolates with the data set. 
-
+As for the sex variable, males have a somewhat higher median wage, and the first and third wage quartiles in males are respectively higher than those in females. The wage outliers among males also tend to earn more than those in females, suggesting that that the upper few percents of earners will tend to be male.
 
 First we assume that there is a linear relationship between the covariates, ie. the relationship can be expressed as:
+
+
 $$\bf{Y} = \bf{X} \bf{\beta} + \bf{\varepsilon}$$
 
-Linearity of covariates: Y=Xβ+ε. Problem: non-linear relationship?
+In order to perform a multiple linear regression analysis, we must make the following assumptions:
+First, the response, which is wage, is a linear combination of the covariates, and errors are additive onto the linear combination, i.e. $\bf{Y} = \bf{X} \bf{\beta} + \bf{\varepsilon}$. Second, that we have homoscedastic error variance and uncorrelated errors, i.e. Cov(ε)=$σ^2\bf{I}$, Cov($ε_i,ε_j$)=0. For this model, this means that along age, sex, language and education, the variance in wage is the same for any observation, or set of observations.
 
-Homoscedastic error variance: Cov(ε)=σ2I. Problem: Non-constant variance of error terms
-
-Uncorrelated errors: Cov(εi,εj)=0.
+In order for the model to also be "normal", 
+.
 
 Additivity of errors: Y=Xβ+ε
 
-Assumption of normality: ε∼Nn(0,σ2I)
+Additionally, 
+Assumption of normality: ε∼N(0,σ2I)
 
 # Part 2
 
