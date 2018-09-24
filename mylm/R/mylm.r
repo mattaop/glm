@@ -8,17 +8,19 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
   Y  <- model.response(mf)
   terms <- attr(mf, "terms")
 
-
   # Add code here to calculate coefficients, residuals, fitted values, etc...
   # and store the results in the list est
   betahat <- solve(t(X) %*% X) %*% t(X) %*% Y
   H <- X%*%solve((t(X)%*%X))%*%t(X)
   residuals <- (diag(nrow(H))-H)%*%Y
+  mse <- sum((Y - X%*%betahat)^2)/(nrow(X))
+  Cov <- mse*solve(t(X)%*%X)
   sigma2 <- sum((Y - X%*%betahat)^2) / (nrow(X) - ncol(X))
   std <- sqrt(diag(solve(crossprod(X))) * sigma2)
-  t_value <- betahat/std
+  z_value <- betahat/std
   p_value <- pnorm(-abs(betahat)/std)  * 2
-  est <- list(terms = terms, model = mf, betahat = betahat, residuals=residuals, std = t(std), t_value=t_value, p_value=p_value)
+  p_value2 <- 2*exp(-(abs(z_value)^2)/2)/(sqrt(2*pi)*abs(z_value))
+  est <- list(terms = terms, model = mf, betahat = betahat, residuals=residuals, std = t(std), z_value=z_value, p_value=p_value, p_value2=p_value2, covariance.matrix=Cov)
 
   # Store call and formula used
   est$call <- match.call()
@@ -31,9 +33,9 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
   rss <- sum(residuals ^ 2)  ## residual sum of squares
   tss <- sum((Y - mean(Y)) ^ 2)  ## total sum of squares
   R_squared <- 1 - rss/tss
-  n = length(Y)
-  p = length(betahat)-1
-  adj_R_squared <- 1-(1-R_squared)*(n-1)/(n-p-1)
+  n <- length(Y)
+  k <- length(betahat)-1
+  adj_R_squared <- 1-(1-R_squared)*(n-1)/(n-k-1)
   est$R_squared <- R_squared
   est$adj_R_squared <- adj_R_squared
 
@@ -74,10 +76,11 @@ summary.mylm <- function(object, ...){
   print.default(object$betahat, digits=5)
   cat('\nStd. Error')
   print.default(t(object$std), digits = 4)
-  cat('\nt-value')
-  print.default(object$t_value, digits=4)
-  cat('\nPr(>|t|)')
+  cat('\nz-value')
+  print.default(object$z_value, digits=4)
+  cat('\nPr(>|z|)')
   print.default(object$p_value)
+  print.default(object$p_value2)
 
   # R_squared
   cat('\nR-squared:')
