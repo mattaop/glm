@@ -64,13 +64,10 @@ First we assume that there is a linear relationship between the covariates, ie. 
 $$\bf{Y} = \bf{X} \bf{\beta} + \bf{\varepsilon}$$
 
 In order to perform a multiple linear regression analysis, we must make the following assumptions:
+First, the response, which is wage, is a linear combination of the covariates, and errors are additive onto the linear combination, i.e. $\bf{Y} = \bf{X} \bf{\beta} + \bf{\varepsilon}$. Second, that we have homoscedastic error variance and uncorrelated errors, i.e. Cov(ε)=$σ^2\bf{I}$, Cov($ε_i,ε_j$)=0. For this model, this means that along age, sex, language and education, the variance in wage is the same for any observation, or set of observations.
 
-
-Linearity of covariates: Y=Xβ+ε. In this case, Problem: non-linear relationship?
-
-Homoscedastic error variance: Cov(ε)=σ2I. Problem: Non-constant variance of error terms
-
-Uncorrelated errors: Cov(εi,εj)=0.
+In order for the model to also be "normal", 
+.
 
 Additivity of errors: Y=Xβ+ε
 
