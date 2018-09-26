@@ -122,28 +122,24 @@ plot(model1b, which = c(1))
 ```
 The plot shows the residuals plotted against the fitted values. A residual plot shows if the linear regression is appropriate for the data. A random distribution around the horisontal-axis suggest that there is no systematical error in the regression, and that a linear regression is appropriate. On the other side, if the residuals follow a systematix distribution around the horisontal-axis, there is likely that the relationship between the covariates and the response is non-linear. In this plot we 
 interprets the plot as randomly distributed, and that the relationship can be described as a linear regression.
+
 **d)**
-After a scaling, the χ2-distribution is the limiting distribution of an F-distribution as the denominator degrees of freedom goes to infinity. The normalization is χ2 = (numerator degrees of freedom)·F.
-• What is the residual sum of squares (SSE) and the degrees of freedom for this model?
-• What is total sum of squares (SST) for this model? Test the significance of the regression using a
-χ2-test.
-• What is the relationship between the χ2- and z-statistic in simple linear regression? Find the criticalvalue(s) for both tests.
 
 * The residual sum of squares (SSE) for this model is computed as: $SSE = \sum_{i=1}^{n} \epsilon_i^2$ where $\epsilon_i = (I-H)Y$. 
-```{r}
+```{r, echo = FALSE}
 cat("SSE: ")
 print.default(model1$sse)
 ```
 In this case The degrees of freedom for this model is the number of dimesions that are free, which can be expressed by $df = n-p-1$, where n is the number of datapoints (in this caes 3987) and p is the number of explanatory parameters (in this case 1). Thus $df = 3985$.
 
 * The total sum of squares (SST) is $\sum_{i=1}^{n}(Y - mean(Y))^2$
-```{r}
+```{r, echo = FALSE}
 cat("SST: ")
 print.default(model1$sst)
 ```
 **e)**
 The coefficient of determination $R^2$ is computed $R^2 = SSR/SST = 1 - SSE/SST$, where SSR/SST can be interpreted as how much of the total variability in the data (SST) is described by the regression (SSR). We want the regression to describe the variability in the data, and thus a $R^2$-value as close to 1 as possible is desired ($0 \leq R^2 \leq 1$). In a simple linear regression, $R^2$ is the squared correlation coefficient between the response and the predictor (in this case wage and education*$\hat \beta$), and for multiple linear regression $R^2$ is the squared correlation coefficient between the response and the predicted response. The value for our model is: 
-```{r}
+```{r, echo = FALSE}
 cat("R-squared: ")
 print.default(model1$R_squared)
 ```
@@ -173,4 +169,30 @@ model2a <- mylm(wages ~ education, data = SLID)
 model2b <- mylm(wages ~ age, data = SLID)
 summary(model2a)
 summary(model2b)
+```
+
+# Part 4
+```{r}
+library(mylm)
+model3 <- mylm(wages ~ sex + age + language + I(education^2), data = SLID)
+model3b <-  lm(wages ~ sex + age + language + I(education^2), data = SLID)
+print(model3)
+print(model3b)
+```
+
+
+```{r}
+library(mylm)
+model4 <- mylm(wages ~ language + age + language*age, data = SLID)
+model4b <-  lm(wages ~ language + age + language*age, data = SLID)
+print(model4)
+print(model4b)
+```
+
+```{r}
+library(mylm)
+model5 <- mylm(wages ~ education - 1, data = SLID)
+model5b <-  lm(wages ~ education - 1, data = SLID)
+print(model5)
+print(model5b)
 ```
