@@ -1,6 +1,7 @@
 ---
 output:
-  pdf_document: default
+  pdf_document: 
+    latex_engine: xelatex
   html_document: default
 ---
 
@@ -38,8 +39,7 @@ To get a pdf file, make comments of the lines with the "html_document" informati
 
 Your answer for part 1a)
 
-```{r setup, include=FALSE}
-install.packages("car")
+```{r, include=FALSE}
 library(car)
 data(SLID, package = "carData")
 SLID <- SLID[complete.cases(SLID), ]
@@ -118,7 +118,7 @@ Which suggests that both the intercept and the regression  coefficients are sign
 # R code for part 2c)
 library(ggplot2)
 plot(model1)
-plot(model1b)
+plot(model1b, which = c(1))
 ```
 The plot shows the residuals plotted against the fitted values. A residual plot shows if the linear regression is appropriate for the data. A random distribution around the horisontal-axis suggest that there is no systematical error in the regression, and that a linear regression is appropriate. On the other side, if the residuals follow a systematix distribution around the horisontal-axis, there is likely that the relationship between the covariates and the response is non-linear. In this plot we 
 interprets the plot as randomly distributed, and that the relationship can be described as a linear regression.
