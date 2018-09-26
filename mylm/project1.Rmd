@@ -79,23 +79,22 @@ Assumption of normality: ε∼N(0,σ2I)
 **a)**
 
 ```{r}
-# some R code for part 2a)
+# R code for part 2a)
 library(mylm)
 model1 <- mylm(wages ~ education, data = SLID)
 print(model1)
 model1b <- lm(wages ~ education, data = SLID)
 print(model1b)
-
 ```
 **b)**
 Here is a print out of tha covariance matrix defined as:
 $$\Sigma = E\Big[(X-E[X])(X-E[X])^T\Big] = \frac{1}{n}\Big(\sum_{i=1}^{n}(Y_i - \hat Y_i)\Big)(X^TX)^{-1}$$
 ```{r}
-# some R code for part 2b
-print.default(model1$covariance.matrix)
+# R code for part 2b
+print.default(model1$covariance_matrix)
 ```
 ```{r}
-# some R code for part 2b
+# R code for part 2b
 summary(model1)
 summary(model1b)
 ```
@@ -116,7 +115,7 @@ print.default(model1$p_value2)
 Which suggests that both the intercept and the regression  coefficients are significant. The usual level to determen if a coefficient is siginficant or not is a 95%-confidence interval where $P(Z \leq z) < 0.05$. If true, the parameter in question is significant at a 5%-level, which both our parameters are in this case.
 **c)**
 ```{r}
-# some R code for part 2c)
+# R code for part 2c)
 library(ggplot2)
 plot(model1)
 plot(model1b)
@@ -130,6 +129,48 @@ After a scaling, the χ2-distribution is the limiting distribution of an F-distr
 χ2-test.
 • What is the relationship between the χ2- and z-statistic in simple linear regression? Find the criticalvalue(s) for both tests.
 
-* The residual sum of squares (SSE) for this model is computed as: $SSE = \sum_{i=1}^{n} \epsilon_i^2$ where $\epsilon_i = (I-H)Y$. The degrees of freedom for this model is the number of dimesions that are free, which can be expressed by $df = n-p-1$, where n is the number of datapoints (in this caes 3987) and p is the number of explanatory parameters (in this case 1). Thus $df = 3985$.
+* The residual sum of squares (SSE) for this model is computed as: $SSE = \sum_{i=1}^{n} \epsilon_i^2$ where $\epsilon_i = (I-H)Y$. 
+```{r}
+cat("SSE: ")
+print.default(model1$sse)
+```
+In this case The degrees of freedom for this model is the number of dimesions that are free, which can be expressed by $df = n-p-1$, where n is the number of datapoints (in this caes 3987) and p is the number of explanatory parameters (in this case 1). Thus $df = 3985$.
 
 * The total sum of squares (SST) is $\sum_{i=1}^{n}(Y - mean(Y))^2$
+```{r}
+cat("SST: ")
+print.default(model1$sst)
+```
+**e)**
+The coefficient of determination $R^2$ is computed $R^2 = SSR/SST = 1 - SSE/SST$, where SSR/SST can be interpreted as how much of the total variability in the data (SST) is described by the regression (SSR). We want the regression to describe the variability in the data, and thus a $R^2$-value as close to 1 as possible is desired ($0 \leq R^2 \leq 1$). In a simple linear regression, $R^2$ is the squared correlation coefficient between the response and the predictor (in this case wage and education*$\hat \beta$), and for multiple linear regression $R^2$ is the squared correlation coefficient between the response and the predicted response. The value for our model is: 
+```{r}
+cat("R-squared: ")
+print.default(model1$R_squared)
+```
+This value is not very good, and suggests that education alone is not a very good predictor for the wage, and that it doesn't desctibe the variability in the data.
+
+
+# Part 3
+
+**a)**
+```{r}
+# R code for part 3a)
+library(mylm)
+model2 <- mylm(wages ~ education + age, data = SLID)
+print(model2)
+```
+
+**b)**
+```{r}
+# R code for part 3b)
+summary(model2)
+```
+
+**c)**
+```{r}
+# R code for part 3c)
+model2a <- mylm(wages ~ education, data = SLID)
+model2b <- mylm(wages ~ age, data = SLID)
+summary(model2a)
+summary(model2b)
+```

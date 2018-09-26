@@ -11,33 +11,33 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
   # Add code here to calculate coefficients, residuals, fitted values, etc...
   # and store the results in the list est
   betahat <- solve(t(X) %*% X) %*% t(X) %*% Y
+  fitted_values <- X%*%betahat
   H <- X%*%solve((t(X)%*%X))%*%t(X)
   residuals <- (diag(nrow(H))-H)%*%Y
-  mse <- sum((Y - X%*%betahat)^2)/(nrow(X))
+  mse <- sum((Y - fitted_values)^2)/(nrow(X))
   Cov <- mse*solve(t(X)%*%X)
-  sigma2 <- sum((Y - X%*%betahat)^2) / (nrow(X) - ncol(X))
+  sigma2 <- sum((Y - fitted_values)^2) / (nrow(X) - ncol(X))
   std <- sqrt(diag(solve(crossprod(X))) * sigma2)
   z_value <- betahat/std
   p_value <- pnorm(-abs(betahat)/std)  * 2
   p_value2 <- 2*exp(-(abs(z_value)^2)/2)/(sqrt(2*pi)*abs(z_value))
-  est <- list(terms = terms, model = mf, betahat = betahat, residuals=residuals, std = t(std), z_value=z_value, p_value=p_value, p_value2=p_value2, covariance.matrix=Cov)
+  chi_squared <- sum((Y-fitted_values)^2/fitted_values)
+
+
+  # R_squared
+  sse <- sum(residuals ^ 2)  ## residual sum of squares
+  sst <- sum((Y - mean(Y)) ^ 2)  ## total sum of squares
+  R_squared <- 1 - sse/sst
+  n <- length(Y)
+  k <- length(betahat)-1
+  adj_R_squared <- 1-(1-R_squared)*(n-1)/(n-k-1)
+
+  est <- list(terms = terms, model = mf, betahat = betahat, fitted = fitted_values, residuals=residuals, std = t(std), z_value=z_value, p_value=p_value, p_value2=p_value2, covariance_matrix=Cov, R_squared=R_squared, adj_R_squared=adj_R_squared, sse=sse, sst=sst)
+
 
   # Store call and formula used
   est$call <- match.call()
   est$formula <- formula
-
-  # Store response
-  est$fitted.values <- X%*%betahat
-
-  # R_squared
-  rss <- sum(residuals ^ 2)  ## residual sum of squares
-  tss <- sum((Y - mean(Y)) ^ 2)  ## total sum of squares
-  R_squared <- 1 - rss/tss
-  n <- length(Y)
-  k <- length(betahat)-1
-  adj_R_squared <- 1-(1-R_squared)*(n-1)/(n-k-1)
-  est$R_squared <- R_squared
-  est$adj_R_squared <- adj_R_squared
 
   # Set class name. This is very important!
   class(est) <- 'mylm'
@@ -87,6 +87,7 @@ summary.mylm <- function(object, ...){
   print.default(object$R_squared)
   cat('Adjusted R-squared:')
   print.default(object$adj_R_squared)
+  cat('\n\n')
 
 }
 
