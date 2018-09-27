@@ -7,7 +7,7 @@ output:
 
 --- 
 title: "TMA4315: Compulsory exercise 1" 
-subtitle: "Group 1: Adrian Bruland og Mathias Opland" 
+subtitle: "Group 4: Adrian Bruland og Mathias Opland" 
 date: "`r format(Sys.time(), '%d.%m.%Y')`" # the current date, can be regular text as well
 output: # 3rd letter intentation hierarchy
   html_document:
@@ -59,17 +59,13 @@ $$\bf{Y} = \bf{X} \bf{\beta} + \bf{\varepsilon}$$
 In order to perform a multiple linear regression analysis, we must make the following assumptions:
 First, the response, which is wage, is a linear combination of the covariates, and errors are additive onto the linear combination, i.e. $\bf{Y} = \bf{X} \bf{\beta} + \bf{\varepsilon}$. Second, that we have homoscedastic error variance and uncorrelated errors, i.e. Cov(ε)=$σ^2\bf{I}$, Cov($ε_i,ε_j$)=0. For this model, this means that along age, sex, language and education, the variance in wage is the same for any observation, or set of observations.
 
-In order for the model to also be "normal", 
-.
+In addition, the model must be a "normal model" (cf. Module 2 in the course) in order for us to perform linear regression. In a normal linear model, we assume that the errors are independent and normally distributed, with the same variance for all errors: $\bf{\varepsilon} \sim N_n(0,\sigma^2I)$. 
 
-Additivity of errors: Y=Xβ+ε
-
-Additionally, 
-Assumption of normality: ε∼N(0,σ2I)
 
 # Part 2
 
 **a)**
+Here is a print of the mylm-package and the built-in lm-package.
 ```{r}
 library(mylm)
 model1 <- mylm(wages ~ education, data = SLID)
@@ -77,6 +73,8 @@ print(model1)
 model1b <- lm(wages ~ education, data = SLID)
 print(model1b)
 ```
+As shown, the two packages produces the same information when using the print-function. The result is a linear regression with wage as response, and education as the only covariate. The intercept can be interpreted as the expected wage when one have no edjucation, but as shown in the plot in task 1, there is none or very few that has under 5 years of edjucation, and few that has under 10 years of edjucation. Thus the regression will not be very informative when under 5 years of edjucation, as the regression is based on very little or none data from under this value.
+
 **b)**
 Here is a print out of tha covariance matrix defined as:
 $$\Sigma = E\Big[(X-E[X])(X-E[X])^T\Big] = \frac{1}{n}\Big(\sum_{i=1}^{n}(Y_i - \hat Y_i)\Big)(X^TX)^{-1}$$
@@ -89,19 +87,20 @@ summary(model1b)
 ```
 The intercept estimate as shown in the print out is 4.97169 and the estimated standard error is 0.53429. For the regression coefficient the estimate is 0.79231 and the estimated standard error is 0.03906. Using a Z-test, we get:
 $$ P(Z \leq |z|)=2 \cdot \Phi(-|Z|), \hspace{1cm} Z=\frac{x-\mu}{\sigma} $$
+Here we use that the normal distribution is two-sided, but we also normalize the data with mean $\mu = 0$ and variance $\sigma = 1$. Thus we know that we only have to look at one side of the distribution, and multiply by two afterwords. 
 In our case, the $H_0$ hypotheses is that $\mu$ is zeros, and thus we get $Z=x/ \sigma$:
 ```{r}
 cat("Z-values for the regression coefficients: ")
 print.default(model1$z_value)
 ```
-Computing the p-values using
-$$P(Z \leq z) = \frac{1}{\sqrt{2 \pi}} \int_{-\infty}^{z} e^{-t^2}dt$$
-The compution is implemented in our mylm package, and gives the values:
+Computing the p-values are done by the integral
+$$P(Z \leq z) = \frac{1}{\sqrt{2 \pi}} \int_{-\infty}^{z} e^{-t^2}dt,$$
+but as it is not analytic solvable for a unknown $z$, we use the built-in function pnorm, which gives the values:
 ```{r}
 cat("P-values for the regression coefficients: ")
-print.default(model1$p_value2)
+print.default(model1$p_value)
 ```
-Which suggests that both the intercept and the regression  coefficients are significant. The usual level to determen if a coefficient is siginficant or not is a 95%-confidence interval where $P(Z \leq z) < 0.05$. If true, the parameter in question is significant at a 5%-level, which both our parameters are in this case.
+This suggests that both the intercept and the regression coefficients are significant. The usual level to determen if a coefficient is siginficant or not is a 95%-confidence interval where $P(Z \leq z) < 0.05$. If true, the parameter in question is significant at a 5%-level, which both our parameters are in this case.
 **c)**
 ```{r}
 library(ggplot2)
