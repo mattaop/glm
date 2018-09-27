@@ -6,8 +6,8 @@ output:
 ---
 
 --- 
-title: "TMA4315: Compulsory exercise 1 (title)" 
-subtitle: "Group 0: Name1, Name2 (subtitle)" 
+title: "TMA4315: Compulsory exercise 1" 
+subtitle: "Group 1: Adrian Bruland og Mathias Opland" 
 date: "`r format(Sys.time(), '%d.%m.%Y')`" # the current date, can be regular text as well
 output: # 3rd letter intentation hierarchy
   html_document:
@@ -29,15 +29,9 @@ opts_chunk$set(tidy.opts = list(width.cutoff = 68), tidy = TRUE, warning = FALSE
 
 # Part 1
 
-**Bold**
 
-_italic_
-
-To get a pdf file, make comments of the lines with the "html_document" information, and make the lines with the "pdf_document" information regular, and vice versa.
 
 ## a)
-
-Your answer for part 1a)
 
 ```{r, include=FALSE}
 library(car)
@@ -47,7 +41,6 @@ SLID <- SLID[complete.cases(SLID), ]
 ```
 
 ```{r}
-# some R code for part 1a)
 library(GGally)
 ggpairs(SLID, lower = list(combo = wrap(ggally_facethist, binwidth = 0.5)))
 ```
@@ -77,9 +70,7 @@ Assumption of normality: ε∼N(0,σ2I)
 # Part 2
 
 **a)**
-
 ```{r}
-# R code for part 2a)
 library(mylm)
 model1 <- mylm(wages ~ education, data = SLID)
 print(model1)
@@ -90,11 +81,9 @@ print(model1b)
 Here is a print out of tha covariance matrix defined as:
 $$\Sigma = E\Big[(X-E[X])(X-E[X])^T\Big] = \frac{1}{n}\Big(\sum_{i=1}^{n}(Y_i - \hat Y_i)\Big)(X^TX)^{-1}$$
 ```{r}
-# R code for part 2b
 print.default(model1$covariance_matrix)
 ```
 ```{r}
-# R code for part 2b
 summary(model1)
 summary(model1b)
 ```
@@ -115,13 +104,11 @@ print.default(model1$p_value2)
 Which suggests that both the intercept and the regression  coefficients are significant. The usual level to determen if a coefficient is siginficant or not is a 95%-confidence interval where $P(Z \leq z) < 0.05$. If true, the parameter in question is significant at a 5%-level, which both our parameters are in this case.
 **c)**
 ```{r}
-# R code for part 2c)
 library(ggplot2)
 plot(model1)
 plot(model1b, which = c(1))
 ```
-The plot shows the residuals plotted against the fitted values. A residual plot shows if the linear regression is appropriate for the data. A random distribution around the horisontal-axis suggest that there is no systematical error in the regression, and that a linear regression is appropriate. On the other side, if the residuals follow a systematix distribution around the horisontal-axis, there is likely that the relationship between the covariates and the response is non-linear. In this plot we 
-interprets the plot as randomly distributed, and that the relationship can be described as a linear regression.
+The plot shows the residuals plotted against the fitted values. A residual plot shows if the linear regression is appropriate for the data. A random distribution around the horisontal-axis suggest that there is no systematical error in the regression, and that a linear regression is appropriate. On the other side, if the residuals follow a systematix distribution around the horisontal-axis, there is likely that the relationship between the covariates and the response is non-linear. In this plot we can see that the points lies closer to zero at at the start of the x-axis, and as we move along, the points spread out more. However there is also a lot more points as we moce along the x-axis, which explains why some of the points also lies further from zeros. On the other hand, we can see that the points seem to lie much closer under the zero line, and that there is much more spread out on above zero. This is not a random pattern, and lead us to the conclusion that the regression is not a very good fit for the datapoints. From this plot we think that there is easier to predict some sort of minimum wage given a certain education level, but above this wage-level there is more variance, and therefore not as defined maximum wage-level given a edjucation level.
 
 **d)**
 
@@ -137,6 +124,19 @@ In this case The degrees of freedom for this model is the number of dimesions th
 cat("SST: ")
 print.default(model1$sst)
 ```
+The $\chi^2$-statistics is computed by $\chi^2 = df \cdot \frac{SST-SSE}{SSE}$, which gives:
+```{r, echo=FALSE}
+cat("Chi-squared statistics from mylm-package: ")
+chi_squared <-  model1$degrees_of_freedom*(model1$sst - model1$sse)/model1$sse
+print(chi_squared)
+cat("Chi-squared p-value: ")
+pchisq(chi_squared, 1, lower.tail = FALSE)
+cat("\nF-statistics from lm-package: ")
+summary(model1b)$fstatistic[1]
+cat("F p-value: ")
+anova(model1b)$"Pr(>F)"[1]
+```
+
 **e)**
 The coefficient of determination $R^2$ is computed $R^2 = SSR/SST = 1 - SSE/SST$, where SSR/SST can be interpreted as how much of the total variability in the data (SST) is described by the regression (SSR). We want the regression to describe the variability in the data, and thus a $R^2$-value as close to 1 as possible is desired ($0 \leq R^2 \leq 1$). In a simple linear regression, $R^2$ is the squared correlation coefficient between the response and the predictor (in this case wage and education*$\hat \beta$), and for multiple linear regression $R^2$ is the squared correlation coefficient between the response and the predicted response. The value for our model is: 
 ```{r, echo = FALSE}
@@ -173,9 +173,10 @@ summary(model2b)
 
 # Part 4
 ```{r}
+SLID$languageRELEVEL <- relevel(SLID$language, ref = "Other")
 library(mylm)
-model3 <- mylm(wages ~ sex + age + language + I(education^2), data = SLID)
-model3b <-  lm(wages ~ sex + age + language + I(education^2), data = SLID)
+model3 <- mylm(wages ~ sex + age + languageRELEVEL + I(education^2), data = SLID)
+model3b <-  lm(wages ~ sex + age + languageRELEVEL + I(education^2), data = SLID)
 print(model3)
 print(model3b)
 ```
@@ -196,3 +197,4 @@ model5b <-  lm(wages ~ education - 1, data = SLID)
 print(model5)
 print(model5b)
 ```
+

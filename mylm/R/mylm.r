@@ -19,8 +19,7 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
   sigma2 <- sum((Y - fitted_values)^2) / (nrow(X) - ncol(X))
   std <- sqrt(diag(solve(crossprod(X))) * sigma2)
   z_value <- betahat/std
-  p_value <- pnorm(-abs(betahat)/std)  * 2
-  p_value2 <- 2*exp(-(abs(z_value)^2)/2)/(sqrt(2*pi)*abs(z_value))
+  p_value <- pnorm(-abs(z_value))  * 2
   chi_squared <- sum((Y-fitted_values)^2/fitted_values)
 
 
@@ -31,8 +30,9 @@ mylm <- function(formula, data = list(), contrasts = NULL, ...){
   n <- length(Y)
   k <- length(betahat)-1
   adj_R_squared <- 1-(1-R_squared)*(n-1)/(n-k-1)
+  degrees_of_freedom = n-k-1
 
-  est <- list(terms = terms, model = mf, betahat = betahat, fitted = fitted_values, residuals=residuals, std = t(std), z_value=z_value, p_value=p_value, p_value2=p_value2, covariance_matrix=Cov, R_squared=R_squared, adj_R_squared=adj_R_squared, sse=sse, sst=sst)
+  est <- list(terms = terms, model = mf, betahat = betahat, fitted = fitted_values, residuals=residuals, std = t(std), z_value=z_value, p_value=p_value, covariance_matrix=Cov, R_squared=R_squared, adj_R_squared=adj_R_squared, sse=sse, sst=sst, degrees_of_freedom=degrees_of_freedom)
 
 
   # Store call and formula used
@@ -64,9 +64,11 @@ summary.mylm <- function(object, ...){
   cat('Min: ')
   print.default(min(object$residuals), digits=5)
   cat('1Q: ')
+  print.default(quantile(object$residuals, 0.25), digits=4)
   cat('Median: ')
   print.default(median(object$residuals), digits=4)
   cat('3Q: ')
+  print.default(quantile(object$residuals, 0.75), digits=4)
   cat('Max: ')
   print.default(max(object$residuals), digits=5)
   cat('\nCoefficients:\n')
@@ -80,7 +82,6 @@ summary.mylm <- function(object, ...){
   print.default(object$z_value, digits=4)
   cat('\nPr(>|z|)')
   print.default(object$p_value)
-  print.default(object$p_value2)
 
   # R_squared
   cat('\nR-squared:')
