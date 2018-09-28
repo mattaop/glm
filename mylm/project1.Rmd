@@ -30,9 +30,6 @@ opts_chunk$set(tidy.opts = list(width.cutoff = 68), tidy = TRUE, warning = FALSE
 # Part 1
 
 
-
-## a)
-
 ```{r, include=FALSE}
 library(car)
 data(SLID, package = "carData")
@@ -65,6 +62,7 @@ In addition, the model must be a "normal model" (cf. Module 2 in the course) in 
 # Part 2
 
 **a)**
+
 Here is a print of the mylm-package and the built-in lm-package.
 ```{r}
 library(mylm)
@@ -76,6 +74,7 @@ print(model1b)
 As shown, the two packages produces the same information when using the print-function. The result is a linear regression with wage as response, and education as the only covariate.
 
 **b)**
+
 Here is a print out of tha covariance matrix defined as:
 $$\Sigma = E\Big[(X-E[X])(X-E[X])^T\Big] = \frac{1}{n}\Big(\sum_{i=1}^{n}(Y_i - \hat Y_i)\Big)(X^TX)^{-1}$$
 ```{r}
@@ -103,7 +102,9 @@ cat("P-values for the regression coefficients: ")
 print.default(model1$p_value)
 ```
 This suggests that both the intercept and the regression coefficients are significant. The usual level to determen if a coefficient is siginficant or not is a 95%-confidence interval where $P(Z \leq z) < 0.05$. If true, the parameter in question is significant at a 5%-level, which both our parameters are in this case.
+
 **c)**
+
 ```{r}
 library(ggplot2)
 plot(model1)
@@ -149,7 +150,9 @@ cricical_chi <- qchisq(.05, 1, lower.tail=FALSE)
 cricical_chi
 ```
 We are dividing 0.05 by 2 in the computation of the critical z-value as the distribution is two tailed, with each tail being 0.025 each. The $\chi^2$ distribution on the other hand is not two tailed, and thus we are using 0.05.
+
 **e)**
+
 The coefficient of determination $R^2$ is computed $R^2 = SSR/SST = 1 - SSE/SST$, where SSR/SST can be interpreted as how much of the total variability in the data (SST) is described by the regression (SSR). We want the regression to describe the variability in the data, and thus a $R^2$-value as close to 1 as possible is desired ($0 \leq R^2 \leq 1$). In a simple linear regression, $R^2$ is the squared correlation coefficient between the response and the predictor (in this case wage and education*$\hat \beta$), and for multiple linear regression $R^2$ is the squared correlation coefficient between the response and the predicted response. The value for our model is: 
 ```{r, echo = FALSE}
 cat("R-squared: ")
@@ -161,6 +164,7 @@ This value is not very good, and suggests that education alone is not a very goo
 # Part 3
 
 **a)**
+
 ```{r}
 library(mylm)
 model2 <- mylm(wages ~ education + age, data = SLID)
@@ -168,12 +172,16 @@ model2b <- lm(wages ~ education + age, data = SLID)
 print(model2)
 ```
 Here we get a linear regression with wages as respones, and edjucation and age as covariates. The intercept are at -6.0217, which doesn't make any sense (paying for working), but the covariates at the intercept will be a zero year old with no edjucation. They will of course not work, and there is no data at those values. As mention earlier, we have to look at the range of data which the regression is based on. The coefficient for education suggests that the composit hourly wage increases with approximately 0.9 dollars per year of edjucation, and the coefficient for age suggests that for each year older one gets, the wages will increase by approximately 0.26 dollars per hour. 
+
 **b)**
+
 ```{r}
 summary(model2)
 ```
 The estimated standard error for the intercept is 0.618924, and for the regression coefficients edjucation and age it is respectivly 0.035760 and 0.008951. As we can see there is a much larger estimated standard error for the intercept, but the estimated value is also much larger. The z-value gives a better representation of the standard error with respect to the size of the estimate. Here we can see that the intercept has the lowest absolute z-value, which means that the standard error is largest with respect to the estimate. If we then look at the p-value for the estimates, we can see that both the coeffisients an the intercept is significant (with 5%-level), but intercept has the highest p-value.
+
 **c)**
+
 ```{r}
 model2a <- mylm(wages ~ education, data = SLID)
 model2b <- mylm(wages ~ age, data = SLID)
@@ -181,6 +189,7 @@ summary(model2a)
 summary(model2b)
 ```
 The two simple linear regressions both tries to explain the wages based on only one covariate. If the two covariates was uncorrelated, the multiple regression would be the same as two simple regression, but as shown in the plot in task 1, there is a negative correlation between age and edjucation, and thus both the regression coefficients are higher in the multiple linear regression. The simple regression with age as a covariate will try to explain the difference in wages only based on age, but as one gets older, there one is less likley to have much edjucation (due to the negative correlation), so it also takes that in to account. Thus true effect of the age will not be shown, and the regression coefficient is lower than in the multiple regression. The same argument can be made for the simple regression using edjucation as the only covariate, and thus both the simple regression has smaller estimates with higher standard error than the multiple regression. We can also see that the $R^2$ value for the multiple linear regression is more than the sum of the $R^2$ values for the simple regression, suggesting that the multiple linear regression explains more of the varianace in the wage than the simple linear regressions combined.
+
 # Part 4
 ```{r}
 SLID$languageRELEVEL <- relevel(SLID$language, ref = "Other")
