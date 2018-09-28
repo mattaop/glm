@@ -164,14 +164,15 @@ This value is not very good, and suggests that education alone is not a very goo
 ```{r}
 library(mylm)
 model2 <- mylm(wages ~ education + age, data = SLID)
+model2b <- lm(wages ~ education + age, data = SLID)
 print(model2)
 ```
-
+Here we get a linear regression with wages as respones, and edjucation and age as covariates. The intercept are at -6.0217, which doesn't make any sense (paying for working), but the covariates at the intercept will be a zero year old with no edjucation. They will of course not work, and there is no data at those values. As mention earlier, we have to look at the range of data which the regression is based on. The coefficient for education suggests that the composit hourly wage increases with approximately 0.9 dollars per year of edjucation, and the coefficient for age suggests that for each year older one gets, the wages will increase by approximately 0.26 dollars per hour. 
 **b)**
 ```{r}
 summary(model2)
 ```
-
+The estimated standard error for the intercept is 0.618924, and for the regression coefficients edjucation and age it is respectivly 0.035760 and 0.008951. As we can see there is a much larger estimated standard error for the intercept, but the estimated value is also much larger. The z-value gives a better representation of the standard error with respect to the size of the estimate. Here we can see that the intercept has the lowest absolute z-value, which means that the standard error is largest with respect to the estimate. If we then look at the p-value for the estimates, we can see that both the coeffisients an the intercept is significant (with 5%-level), but intercept has the highest p-value.
 **c)**
 ```{r}
 model2a <- mylm(wages ~ education, data = SLID)
@@ -179,7 +180,7 @@ model2b <- mylm(wages ~ age, data = SLID)
 summary(model2a)
 summary(model2b)
 ```
-
+The two simple linear regressions both tries to explain the wages based on only one covariate. If the two covariates was uncorrelated, the multiple regression would be the same as two simple regression, but as shown in the plot in task 1, there is a negative correlation between age and edjucation, and thus both the regression coefficients are higher in the multiple linear regression. The simple regression with age as a covariate will try to explain the difference in wages only based on age, but as one gets older, there one is less likley to have much edjucation (due to the negative correlation), so it also takes that in to account. Thus true effect of the age will not be shown, and the regression coefficient is lower than in the multiple regression. The same argument can be made for the simple regression using edjucation as the only covariate, and thus both the simple regression has smaller estimates with higher standard error than the multiple regression. We can also see that the $R^2$ value for the multiple linear regression is more than the sum of the $R^2$ values for the simple regression, suggesting that the multiple linear regression explains more of the varianace in the wage than the simple linear regressions combined.
 # Part 4
 ```{r}
 SLID$languageRELEVEL <- relevel(SLID$language, ref = "Other")
