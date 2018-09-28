@@ -57,7 +57,7 @@ First we assume that there is a linear relationship between the covariates, ie. 
 $$\bf{Y} = \bf{X} \bf{\beta} + \bf{\varepsilon}$$
 
 In order to perform a multiple linear regression analysis, we must make the following assumptions:
-First, the response, which is wage, is a linear combination of the covariates, and errors are additive onto the linear combination, i.e. $\bf{Y} = \bf{X} \bf{\beta} + \bf{\varepsilon}$. Second, that we have homoscedastic error variance and uncorrelated errors, i.e. Cov(ε)=$σ^2\bf{I}$, Cov($ε_i,ε_j$)=0. For this model, this means that along age, sex, language and education, the variance in wage is the same for any observation, or set of observations.
+First, the response, which is wage, is a linear combination of the covariates, and errors are additive onto the linear combination, i.e. $\bf{Y} = \bf{X} \bf{\beta} + \bf{\varepsilon}$. Second, that we have homoscedastic error variance and uncorrelated errors, i.e. $Cov(\epsilon)=\sigma^2\bf{I}$, $Cov(\epsilon_i,\epsilon_j)=0$. For this model, this means that along age, sex, language and education, the variance in wage is the same for any observation, or set of observations.
 
 In addition, the model must be a "normal model" (cf. Module 2 in the course) in order for us to perform linear regression. In a normal linear model, we assume that the errors are independent and normally distributed, with the same variance for all errors: $\bf{\varepsilon} \sim N_n(0,\sigma^2I)$. 
 
@@ -73,7 +73,7 @@ print(model1)
 model1b <- lm(wages ~ education, data = SLID)
 print(model1b)
 ```
-As shown, the two packages produces the same information when using the print-function. The result is a linear regression with wage as response, and education as the only covariate. The intercept can be interpreted as the expected wage when one have no edjucation, but as shown in the plot in task 1, there is none or very few that has under 5 years of edjucation, and few that has under 10 years of edjucation. Thus the regression will not be very informative when under 5 years of edjucation, as the regression is based on very little or none data from under this value.
+As shown, the two packages produces the same information when using the print-function. The result is a linear regression with wage as response, and education as the only covariate.
 
 **b)**
 Here is a print out of tha covariance matrix defined as:
@@ -85,9 +85,11 @@ print.default(model1$covariance_matrix)
 summary(model1)
 summary(model1b)
 ```
-The intercept estimate as shown in the print out is 4.97169 and the estimated standard error is 0.53429. For the regression coefficient the estimate is 0.79231 and the estimated standard error is 0.03906. Using a Z-test, we get:
+The intercept estimate as shown in the print out is 4.97169 and the estimated standard error is 0.53429. The intercept can be interpreted as the expected wage when one have no edjucation, but as shown in the plot in task 1, there is none or very few that has under 5 years of edjucation, and few that has under 10 years of edjucation. Thus the regression will not be very informative when under 5 years of edjucation, as the regression is based on very little or none data from under this value. The value of the coefficient estimate for edjucation 0.79231 and the estimated standard error is 0.03906. Thus the regression propose that for each year of edjucation, the composite hourly wage rate will increase by approxomatly 0.79 dollars (The documentation of the SLID data set doesn't say anything about currency for the data, so based on the numbers we get and the fact that the publisher of the data set is canadian, we guess that the data is given in Canadian or US dollar).
+
+Using a Z-test, we get:
 $$ P(Z \leq |z|)=2 \cdot \Phi(-|Z|), \hspace{1cm} Z=\frac{x-\mu}{\sigma} $$
-Here we use that the normal distribution is two-sided, but we also normalize the data with mean $\mu = 0$ and variance $\sigma = 1$. Thus we know that we only have to look at one side of the distribution, and multiply by two afterwords. 
+Here we use that the normal distribution is two-sided, but we also normalize the data with mean $\mu = 0$ and variance $\sigma = 1$. Thus we know that we only have to look at one side of the distribution, and multiply by two afterwards. 
 In our case, the $H_0$ hypotheses is that $\mu$ is zeros, and thus we get $Z=x/ \sigma$:
 ```{r}
 cat("Z-values for the regression coefficients: ")
@@ -118,12 +120,12 @@ print.default(model1$sse)
 ```
 In this case The degrees of freedom for this model is the number of dimesions that are free, which can be expressed by $df = n-p-1$, where n is the number of datapoints (in this caes 3987) and p is the number of explanatory parameters (in this case 1). Thus $df = 3985$.
 
-* The total sum of squares (SST) is $\sum_{i=1}^{n}(Y - mean(Y))^2$
+* The total sum of squares (SST) is $\sum_{i=1}^{n}(Y - \bar(Y))^2$:
 ```{r, echo = FALSE}
 cat("SST: ")
 print.default(model1$sst)
 ```
-The $\chi^2$-statistics is computed by $\chi^2 = df \cdot \frac{SST-SSE}{SSE}$, which gives:
+The $\chi^2$-statistics is computed by $\chi_r^2 = r \cdot \frac{SST-SSE}{SSE}$, which gives:
 ```{r, echo=FALSE}
 cat("Chi-squared statistics from mylm-package: ")
 chi_squared <-  model1$degrees_of_freedom*(model1$sst - model1$sse)/model1$sse
@@ -132,10 +134,21 @@ cat("Chi-squared p-value: ")
 pchisq(chi_squared, 1, lower.tail = FALSE)
 cat("\nF-statistics from lm-package: ")
 summary(model1b)$fstatistic[1]
-cat("F p-value: ")
+cat("F-statistics p-value: ")
 anova(model1b)$"Pr(>F)"[1]
 ```
+The F-distribution is asymptotic, and will close in on the $\chi^2$ as the number of observations gets higher: $r \cdot F_{r,n} \xrightarrow{n \to \infty} \chi_r^2$. Here we can see that we get a answer close to the lm F-statistics, which is expected with a so high number of data. We are using r = 1 in this computation, since that is the number of regression coefficients.
 
+* In a simple linear regression, the $\chi^2$-test and the z-test wil describe the same thing, as the $\chi^2$-test checks the significance of all the covariates together. In other words, the $\chi^2$-test checks the significance of the regression. The z-test on the other hand checks the significance of each of the covariates. Thus they will in a simple linear regression check the significancy of the covariate, and ultimately test the same thing, but if there is more than one, they will differ. However they have different methods of finding the p-value, as the z-test uses the normal distribution, and $\chi^2$-test uses the $chi^2$ distribution. This gives us in a 95% confidence interval the critical z-value:
+```{r}
+cat("Critical z-value: ")
+critical_z <- qnorm(.05/2,lower.tail=FALSE)
+critical_z
+cat("Critical chi-squared value: ")
+cricical_chi <- qchisq(.05, 1, lower.tail=FALSE)
+cricical_chi
+```
+We are dividing 0.05 by 2 in the computation of the critical z-value as the distribution is two tailed, with each tail being 0.025 each. The $\chi^2$ distribution on the other hand is not two tailed, and thus we are using 0.05.
 **e)**
 The coefficient of determination $R^2$ is computed $R^2 = SSR/SST = 1 - SSE/SST$, where SSR/SST can be interpreted as how much of the total variability in the data (SST) is described by the regression (SSR). We want the regression to describe the variability in the data, and thus a $R^2$-value as close to 1 as possible is desired ($0 \leq R^2 \leq 1$). In a simple linear regression, $R^2$ is the squared correlation coefficient between the response and the predictor (in this case wage and education*$\hat \beta$), and for multiple linear regression $R^2$ is the squared correlation coefficient between the response and the predicted response. The value for our model is: 
 ```{r, echo = FALSE}
