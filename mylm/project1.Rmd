@@ -42,7 +42,7 @@ library(GGally)
 ggpairs(SLID, lower = list(combo = wrap(ggally_facethist, binwidth = 0.5)))
 ```
 
-From the top row we can see that the wage variable shows a noticeable correlation with education, age and sex. Language on the other hand doesn't seem to have a large impact on the wages. One can see that people with high level (20) of education are distributed over the whole span of wages, but low educated people are centred around low wages, with very few or none at high level of wages.
+From the top row we can see that the wage variable shows a noticeable correlation with education, age and sex. Language on the other hand doesn't seem to have a large impact on the wages. One can see that people with high level (20 years) of education are distributed over the whole span of wages, but low educated people are centred around low wages, with very few or none at high level of wages.
 
 The age correlates to wages in that there are people from all age categories that have low wages, but that people are more likely to have a higher wage around age 40. Visually, it seems that the average wage decreases with every age bracket above 40, such that those aged 60 have a lower average wage than 50-year-olds, and so forth. The correlation is posivite and substantial, so the overall trend is that higher age correlates to higher wages. There is a correlation between age and education, in that the education level decreases as the age increases. It is a known fact that the average education level have increased over the last 50 years, which correlates with the data set. 
 
@@ -87,7 +87,7 @@ summary(model1b)
 The intercept estimate as shown in the print out is 4.97169 and the estimated standard error is 0.53429. The intercept can be interpreted as the expected wage when one have no edjucation, but as shown in the plot in task 1, there is none or very few that has under 5 years of edjucation, and few that has under 10 years of edjucation. Thus the regression will not be very informative when under 5 years of edjucation, as the regression is based on very little or none data from under this value. The value of the coefficient estimate for edjucation 0.79231 and the estimated standard error is 0.03906. Thus the regression propose that for each year of edjucation, the composite hourly wage rate will increase by approxomatly 0.79 dollars (The documentation of the SLID data set doesn't say anything about currency for the data, so based on the numbers we get and the fact that the publisher of the data set is canadian, we guess that the data is given in Canadian or US dollar).
 
 Using a Z-test, we get:
-$$ P(Z \leq z)=2 \cdot \Phi(-|Z|), \hspace{1cm} Z=\frac{x-\mu}{\sigma} $$
+$$ P(Z \leq -|z|)=\Phi(-|z|), \hspace{1cm} Z=\frac{x-\mu}{\sigma} $$
 Here we use that the normal distribution is two-sided, but we also normalize the data with mean $\mu = 0$ and variance $\sigma = 1$. Thus we know that we only have to look at one side of the distribution, and multiply by two afterwards. 
 In our case, the $H_0$ hypotheses is that $\mu$ is zeros, and thus we get $Z=x/ \sigma$:
 ```{r, echo=FALSE}
@@ -163,6 +163,8 @@ This value is not very good, and suggests that education alone is not a very goo
 
 # Part 3
 
+We have compared all our results in this task with the built in lm-package to ensure that the mylm-package works correctly.
+
 **a)**
 
 ```{r}
@@ -191,6 +193,8 @@ summary(model2b)
 The two simple linear regressions both tries to explain the wages based on only one covariate. If the two covariates was uncorrelated, the multiple regression would be the same as two simple regression, but as shown in the plot in task 1, there is a negative correlation between age and edjucation, and thus both the regression coefficients are higher in the multiple linear regression. The simple regression with age as a covariate will try to explain the difference in wages only based on age, but as one gets older, there one is less likley to have much edjucation (due to the negative correlation), so it also takes that in to account. Thus true effect of the age will not be shown, and the regression coefficient is lower than in the multiple regression. The same argument can be made for the simple regression using edjucation as the only covariate, and thus both the simple regression has smaller estimates with higher standard error than the multiple regression. We can also see that the $R^2$ value for the multiple linear regression is more than the sum of the $R^2$ values for the simple regression, suggesting that the multiple linear regression explains more of the varianace in the wage than the simple linear regressions combined.
 
 # Part 4
+
+The mylm package produces the same values as the lm function up to 3 digits right of the decimal, so the mylm package passes the three test cases as a viable alternative to the lm function.
 ```{r}
 SLID$languageRELEVEL <- relevel(SLID$language, ref = "Other")
 library(mylm)
@@ -198,7 +202,7 @@ model3 <- mylm(wages ~ sex + age + languageRELEVEL + I(education^2), data = SLID
 summary(model3)
 plot(model3)
 ```
-The mylm package produces the same values as the lm function up to 3 digits, so mylm passes the three test cases. In the first case, it's hard to know why we would like to use the square of the education variable, as it has no obvious real-world interpretation. From the matrix of plots from Part 1, we cannot see any visible quadratic relationship between education and wages, which also suggests that including education squared might have no practical use in a model. The easiest fix would be to simply use education with no exponent, as the linear education-wage relationship is a lot stronger in the models seen above. Assuming one still wants to include education squared, one could remove the language variable, as it has substantially smaller regression parameters than sex or age.
+In the first case, it's hard to know why we would like to use the square of the education variable, as it has no obvious real-world interpretation. From the matrix of plots from Part 1, we cannot see any visible quadratic relationship between education and wages, which also suggests that including education squared might have no applicable use/explanatory value in a (regression) model. The easiest fix would be to simply use education with no exponent, as the linear education-wage relationship is a lot stronger in the models seen above. Assuming one still wants to include education squared, one could can leave it there for the purpose of further testing the usefulness of square terms in our model. Either way, we see from the p-test that language is not a statistically significant variable. Therefore, one may as well remove the language variable, and instead look for alternative explanatory factors beyond sex, education, language or age that can better explain wage in our model.
 
 ```{r}
 library(mylm)
@@ -206,13 +210,119 @@ model4 <- mylm(wages ~ languageRELEVEL + age + languageRELEVEL*age, data = SLID)
 summary(model4)
 plot(model4)
 ```
-As for the second case, the interaction term adds the effect of how age affects wage differently for different language groups. We see that age has the greatest impact on wage amongst English speakers ($\beta_{age*English} = .245$), followed by the speakers of other languages (.208) and finally French speakers (.245-.084=.161). So an increase in one year of age will, according to our model, increase wage by .245 dollars pr hour for English speakers. We see from the matrix of plots in Part 1 that sex seems to have a large impact in predicting wages than language, so one could add that to the model, plus the interaction, to better catch onto the factors that cause wage levels.
-
+As for the second case, the interaction term adds the effect of how age affects wage differently for different language groups. We see that age has the greatest impact on wage amongst English speakers ($\beta_{age*English} = .245$), followed by the speakers of other languages (.208) and finally French speakers (.245-.084=.161). So an increase in one year of age will, according to our model, increase wage by .245 dollars pr hour for English speakers - that's assuming that the model we have is correct. However, the p-test values are too low for statistical significance both for language variable and for the interaction variable between language and age. Therefore, these terms should be discarded from the model - we cannot say that the resulting $\beta$-parameters for language and the interaction have a likelihood higher than our significance level of being the true parameters. We see from the matrix of plots in Part 1 that sex seems to have a substantial impact in predicting wages than language, so one could add that to the model, plus the interaction of sex and age, to better catch the factors that cause wage levels.
 ```{r}
 library(mylm)
 model5 <- mylm(wages ~ education - 1, data = SLID)
 summary(model5)
 plot(model5)
 ```
-On the third model, the intercept is taken away. This greatly restricts the sensitivity of the education parameter, as the model now only has one degree of freedom, so the model risks producing the same parameter even for highly different data sets that would produce different parameters had the intercept been included. The doesn't seem to be much point in making a model with no intercept. We see that the value of the parameter is very different from the one in 2a), where the intercept was included, so this data set exemplifies the change that a model instance can undergo just from removing the intercept.
+On the third model, the intercept is taken away. This greatly restricts the sensitivity of the education parameter, as the model now only has one degree of freedom, so the model risks producing the same parameter even for highly different data sets that would produce different parameters had the intercept been included. The doesn't seem to be much point in making a model with no intercept. We see that the value of the parameter is very different from the one in 2a), where the intercept was included, so this data set exemplifies the change that a model instance can undergo just from removing the intercept. The p-test value is 0, which is unusual - this can indicate that the sample is impossible under the null nypothesis. Thus we can reject the no-intercept-model.
 
+```{r, eval=FALSE}
+
+# Code for the mylm-package
+
+mylm <- function(formula, data = list(), contrasts = NULL, ...){
+  # Extract model matrix & responses
+  mf <- model.frame(formula = formula, data = data)
+  X  <- model.matrix(attr(mf, "terms"), data = mf, contrasts.arg = contrasts)
+  Y  <- model.response(mf)
+  terms <- attr(mf, "terms")
+
+  # Add code here to calculate coefficients, residuals, fitted values, etc...
+  # and store the results in the list est
+  betahat <- solve(t(X) %*% X) %*% t(X) %*% Y
+  fitted_values <- X%*%betahat
+  H <- X%*%solve((t(X)%*%X))%*%t(X)
+  residuals <- (diag(nrow(H))-H)%*%Y
+  mse <- sum((Y - fitted_values)^2)/(nrow(X))
+  Cov <- mse*solve(t(X)%*%X)
+  sigma2 <- sum((Y - fitted_values)^2) / (nrow(X) - ncol(X))
+  std <- sqrt(diag(solve(crossprod(X))) * sigma2)
+  z_value <- betahat/std
+  p_value <- pnorm(-abs(z_value))  * 2
+  chi_squared <- sum((Y-fitted_values)^2/fitted_values)
+
+
+  # R_squared
+  sse <- sum(residuals ^ 2)  ## residual sum of squares
+  sst <- sum((Y - mean(Y)) ^ 2)  ## total sum of squares
+  R_squared <- 1 - sse/sst
+  n <- length(Y)
+  k <- length(betahat)-1
+  adj_R_squared <- 1-(1-R_squared)*(n-1)/(n-k-1)
+  degrees_of_freedom = n-k-1
+  
+  # Add usefull values and matrices to list
+  est <- list(terms = terms, model = mf, betahat = betahat, fitted = fitted_values, residuals=residuals, std = t(std), z_value=z_value, p_value=p_value, covariance_matrix=Cov, R_squared=R_squared, adj_R_squared=adj_R_squared, sse=sse, sst=sst, degrees_of_freedom=degrees_of_freedom)
+
+
+  # Store call and formula used
+  est$call <- match.call()
+  est$formula <- formula
+
+  # Set class name. This is very important!
+  class(est) <- 'mylm'
+
+  # Return the object with all results
+  return(est)
+}
+
+print.mylm <- function(object, ...){
+  # Code here is used when print(object) is used on objects of class "mylm"
+  # Useful functions include cat, print.default and format
+  cat('Call:\n')
+  print.default(object$call)
+  cat('\nCoefficients:\n')
+  print.default(t(object$betahat), digits=5)
+}
+
+summary.mylm <- function(object, ...){
+  # Code here is used when summary(object) is used on objects of class "mylm"
+  # Useful functions include cat, print.default and format
+  
+  # Residuals
+  cat('Call:\n')
+  print.default(object$call)
+  cat('\nResiduals:\n')
+  cat('Min: ')
+  print.default(min(object$residuals), digits=5)
+  cat('1Q: ')
+  print.default(quantile(object$residuals, 0.25), digits=4)
+  cat('Median: ')
+  print.default(median(object$residuals), digits=4)
+  cat('3Q: ')
+  print.default(quantile(object$residuals, 0.75), digits=4)
+  cat('Max: ')
+  print.default(max(object$residuals), digits=5)
+  cat('\nCoefficients:\n')
+
+  # Coefficient estimates
+  cat('Estimate')
+  print.default(object$betahat, digits=5)
+  cat('\nStd. Error')
+  print.default(t(object$std), digits = 4)
+  cat('\nz-value')
+  print.default(object$z_value, digits=4)
+  cat('\nPr(>|z|)')
+  print.default(object$p_value)
+
+  # R_squared values
+  cat('\nR-squared:')
+  print.default(object$R_squared)
+  cat('Adjusted R-squared:')
+  print.default(object$adj_R_squared)
+  cat('\n\n')
+
+}
+
+plot.mylm <- function(object, ...){
+  # Code here is used when plot(object) is used on objects of class "mylm"
+  plot(object$fitted, object$residuals, ylab="Residuals", xlab="Fitted", main="Residual vs Fitted")
+
+}
+
+
+
+```
