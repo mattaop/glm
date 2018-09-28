@@ -192,7 +192,7 @@ The mylm package produces the same values as the lm function up to 3 digits, so 
 
 ```{r}
 library(mylm)
-model4 <- mylm(wages ~ language + age + language*age, data = SLID)
+model4 <- mylm(wages ~ languageRELEVEL + age + languageRELEVEL*age, data = SLID)
 summary(model4)
 plot(model4)
 ```
