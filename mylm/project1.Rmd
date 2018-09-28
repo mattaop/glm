@@ -88,17 +88,17 @@ summary(model1b)
 The intercept estimate as shown in the print out is 4.97169 and the estimated standard error is 0.53429. The intercept can be interpreted as the expected wage when one have no edjucation, but as shown in the plot in task 1, there is none or very few that has under 5 years of edjucation, and few that has under 10 years of edjucation. Thus the regression will not be very informative when under 5 years of edjucation, as the regression is based on very little or none data from under this value. The value of the coefficient estimate for edjucation 0.79231 and the estimated standard error is 0.03906. Thus the regression propose that for each year of edjucation, the composite hourly wage rate will increase by approxomatly 0.79 dollars (The documentation of the SLID data set doesn't say anything about currency for the data, so based on the numbers we get and the fact that the publisher of the data set is canadian, we guess that the data is given in Canadian or US dollar).
 
 Using a Z-test, we get:
-$$ P(Z \leq |z|)=2 \cdot \Phi(-|Z|), \hspace{1cm} Z=\frac{x-\mu}{\sigma} $$
+$$ P(Z \leq z)=2 \cdot \Phi(-|Z|), \hspace{1cm} Z=\frac{x-\mu}{\sigma} $$
 Here we use that the normal distribution is two-sided, but we also normalize the data with mean $\mu = 0$ and variance $\sigma = 1$. Thus we know that we only have to look at one side of the distribution, and multiply by two afterwards. 
 In our case, the $H_0$ hypotheses is that $\mu$ is zeros, and thus we get $Z=x/ \sigma$:
-```{r}
+```{r, echo=FALSE}
 cat("Z-values for the regression coefficients: ")
 print.default(model1$z_value)
 ```
 Computing the p-values are done by the integral
 $$P(Z \leq z) = \frac{1}{\sqrt{2 \pi}} \int_{-\infty}^{z} e^{-t^2}dt,$$
 but as it is not analytic solvable for a unknown $z$, we use the built-in function pnorm, which gives the values:
-```{r}
+```{r, echo=FALSE}
 cat("P-values for the regression coefficients: ")
 print.default(model1$p_value)
 ```
@@ -140,7 +140,7 @@ anova(model1b)$"Pr(>F)"[1]
 The F-distribution is asymptotic, and will close in on the $\chi^2$ as the number of observations gets higher: $r \cdot F_{r,n} \xrightarrow{n \to \infty} \chi_r^2$. Here we can see that we get a answer close to the lm F-statistics, which is expected with a so high number of data. We are using r = 1 in this computation, since that is the number of regression coefficients.
 
 * In a simple linear regression, the $\chi^2$-test and the z-test wil describe the same thing, as the $\chi^2$-test checks the significance of all the covariates together. In other words, the $\chi^2$-test checks the significance of the regression. The z-test on the other hand checks the significance of each of the covariates. Thus they will in a simple linear regression check the significancy of the covariate, and ultimately test the same thing, but if there is more than one, they will differ. However they have different methods of finding the p-value, as the z-test uses the normal distribution, and $\chi^2$-test uses the $chi^2$ distribution. This gives us in a 95% confidence interval the critical z-value:
-```{r}
+```{r, echo=FALSE}
 cat("Critical z-value: ")
 critical_z <- qnorm(.05/2,lower.tail=FALSE)
 critical_z
@@ -162,7 +162,6 @@ This value is not very good, and suggests that education alone is not a very goo
 
 **a)**
 ```{r}
-# R code for part 3a)
 library(mylm)
 model2 <- mylm(wages ~ education + age, data = SLID)
 print(model2)
@@ -170,13 +169,11 @@ print(model2)
 
 **b)**
 ```{r}
-# R code for part 3b)
 summary(model2)
 ```
 
 **c)**
 ```{r}
-# R code for part 3c)
 model2a <- mylm(wages ~ education, data = SLID)
 model2b <- mylm(wages ~ age, data = SLID)
 summary(model2a)
