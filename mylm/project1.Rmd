@@ -185,25 +185,24 @@ summary(model2b)
 SLID$languageRELEVEL <- relevel(SLID$language, ref = "Other")
 library(mylm)
 model3 <- mylm(wages ~ sex + age + languageRELEVEL + I(education^2), data = SLID)
-model3b <-  lm(wages ~ sex + age + languageRELEVEL + I(education^2), data = SLID)
-print(model3)
-print(model3b)
+summary(model3)
+plot(model3)
 ```
-
+The mylm package produces the same values as the lm function up to 3 digits, so mylm passes the three test cases. In the first case, it's hard to know why we would like to use the square of the education variable, as it has no obvious real-world interpretation. From the matrix of plots from Part 1, we cannot see any visible quadratic relationship between education and wages, which also suggests that including education squared might have no practical use in a model. The easiest fix would be to simply use education with no exponent, as the linear education-wage relationship is a lot stronger in the models seen above. Assuming one still wants to include education squared, one could remove the language variable, as it has substantially smaller regression parameters than sex or age.
 
 ```{r}
 library(mylm)
 model4 <- mylm(wages ~ language + age + language*age, data = SLID)
-model4b <-  lm(wages ~ language + age + language*age, data = SLID)
-print(model4)
-print(model4b)
+summary(model4)
+plot(model4)
 ```
+As for the second case, the interaction term adds the effect of how age affects wage differently for different language groups. We see that age has the greatest impact on wage amongst English speakers ($\beta_{age*English} = .245$), followed by the speakers of other languages (.208) and finally French speakers (.245-.084=.161). So an increase in one year of age will, according to our model, increase wage by .245 dollars pr hour for English speakers. We see from the matrix of plots in Part 1 that sex seems to have a large impact in predicting wages than language, so one could add that to the model, plus the interaction, to better catch onto the factors that cause wage levels.
 
 ```{r}
 library(mylm)
 model5 <- mylm(wages ~ education - 1, data = SLID)
-model5b <-  lm(wages ~ education - 1, data = SLID)
-print(model5)
-print(model5b)
+summary(model5)
+plot(model5)
 ```
+On the third model, the intercept is taken away. This greatly restricts the sensitivity of the education parameter, as the model now only has one degree of freedom, so the model risks producing the same parameter even for highly different data sets that would produce different parameters had the intercept been included. The doesn't seem to be much point in making a model with no intercept. We see that the value of the parameter is very different from the one in 2a), where the intercept was included, so this data set exemplifies the change that a model instance can undergo just from removing the intercept.
 
