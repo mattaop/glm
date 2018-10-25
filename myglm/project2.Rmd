@@ -174,7 +174,7 @@ p
 #This code computes result statistics such as mean and standard deviation
 result_statistics <- data.frame(
   Team = rownames(Points),
-  Position = seq(1,length(result_statistics$Team), by=1),
+  Position = seq(1,length(Team), by=1),
   Mean = rowMeans(Points),
   row.names = NULL
 )
