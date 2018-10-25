@@ -75,9 +75,9 @@ As shown, the two packages produces the same information when using the print-fu
 
 **b)**
 
-Here is a print out of tha covariance matrix defined as:
+Here is a print out of the covariance matrix defined as:
 $$\Sigma = E\Big[(X-E[X])(X-E[X])^T\Big] = \frac{1}{n}\Big(\sum_{i=1}^{n}(Y_i - \hat Y_i)\Big)(X^TX)^{-1}$$
-```{r}
+```{r, include=FALSE}
 print.default(model1$covariance_matrix)
 ```
 ```{r}
@@ -87,7 +87,7 @@ summary(model1b)
 The intercept estimate as shown in the print out is 4.97169 and the estimated standard error is 0.53429. The intercept can be interpreted as the expected wage when one have no edjucation, but as shown in the plot in task 1, there is none or very few that has under 5 years of edjucation, and few that has under 10 years of edjucation. Thus the regression will not be very informative when under 5 years of edjucation, as the regression is based on very little or none data from under this value. The value of the coefficient estimate for edjucation 0.79231 and the estimated standard error is 0.03906. Thus the regression propose that for each year of edjucation, the composite hourly wage rate will increase by approxomatly 0.79 dollars (The documentation of the SLID data set doesn't say anything about currency for the data, so based on the numbers we get and the fact that the publisher of the data set is canadian, we guess that the data is given in Canadian or US dollar).
 
 Using a Z-test, we get:
-$$ P(Z \leq -|z|)=\Phi(-|z|), \hspace{1cm} Z=\frac{x-\mu}{\sigma} $$
+$$ P(Z \leq -|z|) + P(Z \geq |z|) = 2 \cdot P(Z \leq -|z|)= 2\cdot \Phi(-|z|), \hspace{1cm} Z=\frac{x-\mu}{\sigma} $$
 Here we use that the normal distribution is two-sided, but we also normalize the data with mean $\mu = 0$ and variance $\sigma = 1$. Thus we know that we only have to look at one side of the distribution, and multiply by two afterwards. 
 In our case, the $H_0$ hypotheses is that $\mu$ is zeros, and thus we get $Z=x/ \sigma$:
 ```{r, echo=FALSE}
@@ -209,7 +209,7 @@ model4 <- mylm(wages ~ languageRELEVEL + age + languageRELEVEL*age, data = SLID)
 summary(model4)
 plot(model4)
 ```
-As for the second case, the interaction term adds the effect of how age affects wage differently for different language groups. We see that age has the greatest impact on wage amongst English speakers ($\beta_{age*English} = .245$), followed by the speakers of other languages (.208) and finally French speakers (.245-.084=.161). So an increase in one year of age will, according to our model, increase wage by .245 dollars pr hour for English speakers - that's assuming that the model we have is correct. However, the p-test values are too low for statistical significance both for language variable and for the interaction variable between language and age. Therefore, these terms should be discarded from the model - we cannot say that the resulting $\beta$-parameters for language and the interaction have a likelihood higher than our significance level of being the true parameters. We see from the matrix of plots in Part 1 that sex seems to have a substantial impact in predicting wages than language, so one could add that to the model, plus the interaction of sex and age, to better catch the factors that cause wage levels.
+As for the second case, the interaction term adds the effect of how age affects wage differently for different language groups. We see that age has the greatest impact on wage amongst English speakers ($\beta_{age*English} = .245$), followed by the speakers of other languages (.208) and finally French speakers (.245-.084=.161). So an increase in one year of age will, according to our model, increase wage by .245 dollars pr hour for English speakers - that's assuming that the model we have is correct. However, the p-test values are too low for statistical significance both for language variable and for the interaction variable between language and age. Therefore, these terms should be discarded from the model - we cannot say that the resulting $\beta$-parameters for language and the interaction have a likelihood higher than our significance level of being the true parameters. We see from the matrix of plots in Part 1 that sex seems to have a substantial impact in predicting wages than language, so one could add that to the model, plus the interaction of sex and age, to better catch the factors that cause wage levels. Here we also can se on the residual plot that the residuals are not normaly distributed around zero, and there seem to be a pattern. Thus there doesn't seem to be a linear relationship between the covariates.
 ```{r}
 library(mylm)
 model5 <- mylm(wages ~ education - 1, data = SLID)

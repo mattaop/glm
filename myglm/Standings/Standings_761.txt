@@ -1,0 +1,17 @@
+Team	Position	GF	GA	GD	Points
+1	Molde	5	56	37	19	50
+2	Stroemsgodset	13	44	44	0	32
+3	Odd	7	38	37	1	39
+4	BodoeGlimt	11	39	43	-4	36
+5	Start	15	29	53	-24	26
+6	Sarpsborg08	6	46	38	8	45
+7	Kristiansund	8	46	46	0	39
+8	Ranheim_TF	4	49	42	7	54
+9	Lillestroem	14	34	49	-15	30
+10	Rosenborg	1	59	26	33	67
+11	Brann	2	45	28	17	57
+12	Haugesund	3	48	31	17	54
+13	Vaalerenga	9	41	52	-11	39
+14	Tromsoe	10	41	43	-2	38
+15	Sandefjord_Fotball	16	27	57	-30	18
+16	Stabaek	12	40	56	-16	33

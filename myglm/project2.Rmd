@@ -1,0 +1,190 @@
+--- 
+title: 'TMA4315: Compulsory exercise 1 (title)'
+output:
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
+  html_document:
+    toc: yes
+    toc_depth: 2
+    toc_float: yes
+date: "`r format(Sys.time(), '%d.%m.%Y')`"
+subtitle: 'Group 0: Name1, Name2 (subtitle)'
+---
+
+```{r setup, include = FALSE}
+library(formatR)
+showsol <- FALSE
+library(knitr)
+opts_chunk$set(tidy.opts = list(width.cutoff = 68), tidy = TRUE, warning = FALSE, error = FALSE, message = FALSE, echo = TRUE)
+```
+
+
+# Part 2
+## a)
+According to the $\chi^2$-test performed by the author, there is no evidence against the assumption of independence between goals scored by the home and the away team.
+```{r}
+filepath <- "https://www.math.ntnu.no/emner/TMA4315/2018h/eliteserien2018"
+eliteserie <- read.table(file = filepath, header = TRUE, colClasses = c("character", 
+    "character", "numeric", "numeric"))
+contigency_table <- table(eliteserie$ya, eliteserie$yh)
+contigency_table
+chisq.test(contigency_table) 
+```
+As we can see in our $\chi^2$-test, the p-value (0.9028) is high, which supports the $H_0$-hypoteses that the goals scored by the home and the away team is independent. We would have to consider some dependency if the p-value had been under our siginficance value at 0.05.
+
+
+## b)
+
+```{r}
+# This function computes the ranking and the goal difference, and returns a result table (not ordered)
+calculate_points <- function(data_eliteserie){
+  result_table <- data.frame(
+     team <- unique(data_eliteserie$home),
+     position <- seq(1, length(team), by=1),
+     goal_for <- rep(0, length(team)),
+     goal_against <- rep(0, length(team)),
+     goal_score <- rep(0, length(team)),
+     points <- rep(0, length(team))
+  )
+  colnames(result_table) <- c("Team", "Position", "GF", "GA", "GD", "Points")
+  for(i in 1:length(data_eliteserie$home)) {
+    if(data_eliteserie$yh[i] > data_eliteserie$ya[i]) {
+      index = which(result_table$Team == data_eliteserie$home[i])
+      result_table[index,]$Points = result_table[index,]$Points + 3
+    }
+    else if(data_eliteserie$yh[i] < data_eliteserie$ya[i]) {
+      index = which(result_table$Team == data_eliteserie$away[i])
+      result_table[index,]$Points = result_table[index,]$Points + 3
+    }
+    else {
+      result_table[which(result_table$Team == data_eliteserie$home[i]),]$Points = result_table[which(result_table$Team == data_eliteserie$home[i]),]$Points + 1
+      result_table[which(result_table$Team == data_eliteserie$away[i]),]$Points = result_table[which(result_table$Team == data_eliteserie$away[i]),]$Points + 1
+    }
+    result_table[which(result_table$Team == data_eliteserie$home[i]),]$GF = result_table[which(result_table$Team == data_eliteserie$home[i]),]$GF + data_eliteserie$yh[i]
+    result_table[which(result_table$Team == data_eliteserie$home[i]),]$GA = result_table[which(result_table$Team == data_eliteserie$home[i]),]$GA + data_eliteserie$ya[i]
+    result_table[which(result_table$Team == data_eliteserie$away[i]),]$GF = result_table[which(result_table$Team == data_eliteserie$away[i]),]$GF + data_eliteserie$ya[i]
+    result_table[which(result_table$Team == data_eliteserie$away[i]),]$GA = result_table[which(result_table$Team == data_eliteserie$away[i]),]$GA + data_eliteserie$yh[i]
+  }
+  result_table$GD <- result_table$GF-result_table$GA
+  ordered_table <- result_table[order(-result_table$Points, -result_table$GD),]
+  i <- 1
+  for (team in ordered_table$Team){
+    result_table[which(result_table$Team == team),]$Position <- i
+    i <- i + 1
+  }
+  return(result_table)
+}
+result_table <- calculate_points(eliteserie)
+result_table <- result_table[order(-result_table$Points, -result_table$GD),] 
+print(result_table)
+```
+Here is a the table ordered after points, where GF is goales scored, GA is goals against and GD is the goal balance.
+
+## c
+```{r}
+# This code generates the design matrix, as well as computing the strength parameters 
+# with our own function, as well as the built in glm function for comparison. 
+library(myglm)
+goals <- c(eliteserie$yh, eliteserie$ya)
+X <- matrix(data = 0, nrow = 384, ncol = 17)
+colnames(X) <- c("Intercept", "HomeAdvantage", unique(eliteserie$home)[-4])
+for(i in 1:length(eliteserie$home)){
+  X[i,1]=1
+  X[i,2]=1
+  home_index <- which(colnames(X)==eliteserie$home[i])
+  away_index <- which(colnames(X)==eliteserie$away[i])
+  X[i,home_index] <- 1
+  X[i,away_index] <- -1
+}
+for(i in 1:length(eliteserie$away)){
+  X[i+length(eliteserie$home),1]=1
+  home_index <- which(colnames(X)==eliteserie$home[i])
+  away_index <- which(colnames(X)==eliteserie$away[i])
+  X[i+length(eliteserie$home),home_index] <- -1
+  X[i+length(eliteserie$home),away_index] <- 1
+}
+strength_param <- myglm(goals ~ -1 + X)
+strength_param <- strength_param[order(-strength_param)]
+names(strength_param) <- substring(names(strength_param), 2)
+strength_param
+
+glm_strength_param <- glm(goals ~ -1 + X, family = "poisson")$coefficients
+#glm_strength_param <- glm_strength_param[order(-glm_strength_param)]
+#glm_strength_param
+
+```
+Here we see the estimated strength-parameters, with the stength parameter of BodoeGlimt set to zero. The expexted number of goals for a home team A is thus $E[A]=exp(\beta_0+\beta_{home}+\beta_{A} -\beta_{B})$ and the away team B has the expected value $E[B]=exp(\beta_0+\beta_{B}-\beta_{A})$. We see that the intercept is some sort of "default" strength for BodoeGlimt, and if a BodoeGlimt play away against a team with higher strength parameter than the intercept, they would have a expected number of goals less than 1 (the sum of the betas less than zero). Rewriting as $E[A] = e^{\beta_0} e^{\beta_{home}} e^{\beta_{A} }/e^{\beta_{B}})$ we can more easily see that the expected number of goals for a team is e in the power of the intercept, times e in the power of the home parameter (if a home game for the team), times the e to the power of the strength parameter of the team, divided by e to the power of the strength parameter of the opponent. 
+```{r, eval=FALSE}
+# This code simulates n seasons, and write the ranking for each season to a txt-file.
+library("reshape2")
+set.seed(42)
+filepath <- "https://www.math.ntnu.no/emner/TMA4315/2018h/unplayed2018"
+eliteserie_unplayed <- read.table(file = filepath, header = TRUE, colClasses = c("character", 
+    "character"))
+simulate_season_end <- function(data_unplayed_matches, strength_param){
+  for(i in 1:length(data_unplayed_matches$home)){
+      intercept <- strength_param["Intercept"]
+      home_advantage <- strength_param["HomeAdvantage"]
+      strength_hometeam <- strength_param[data_unplayed_matches$home[i]]
+      strength_awayteam <- strength_param[data_unplayed_matches$away[i]]
+      if (data_unplayed_matches$home[i] == "BodoeGlimt"){
+        strength_hometeam <- 0
+      }
+      else if (data_unplayed_matches$away[i] == "BodoeGlimt"){
+        strength_awayteam <- 0
+      }
+      data_unplayed_matches$yh[i] <- rpois(1, exp(strength_hometeam+intercept+home_advantage-strength_awayteam))
+      data_unplayed_matches$ya[i] <- rpois(1, exp(strength_awayteam+intercept-strength_hometeam))
+  }
+  return (data_unplayed_matches)
+}
+
+Points <- c()
+for(i in 1:1000){
+  simulated_results <- simulate_season_end(eliteserie_unplayed, strength_param)
+  eliteserie_finished <- rbind(eliteserie, simulated_results)
+  standings <- calculate_points(eliteserie_finished)
+  write.table(standings, paste("Standings\\Standings_", toString(i), ".txt", sep = ""), sep = "\t", quote = FALSE)
+}
+```
+
+```{r}
+# This code loads n season simulations, and plots the result distribution as bar diagram.
+library("ggplot2")
+library("reshape2")
+n <- 1000
+teams <- unique(eliteserie$home)
+Positions <- matrix(0, nrow=length(teams), ncol=n)
+Points <- matrix(0, nrow=length(teams), ncol=n)
+rownames(Positions)<-c(teams)
+rownames(Points)<-c(teams)
+for(i in 1:n){
+  standings <- read.table(file = paste("Standings\\Standings_", toString(i), ".txt", sep = ""), 
+                          header = TRUE, colClasses = c("numeric", "character",  "numeric", "numeric",  "numeric", "numeric"))
+  Positions[,i] <- standings$Position
+  Points[,i] <- standings$Points
+}
+Positions <- melt(Positions, id.vars = c("Teams"))
+p <- ggplot(data = data.frame(Positions), aes(x=value))+geom_bar() + facet_wrap(~Var1)
+p
+```
+
+```{r}
+#This code computes result statistics such as mean and standard deviation
+result_statistics <- data.frame(
+  Team = rownames(Points),
+  Position = seq(1,length(Team), by=1),
+  Mean = rowMeans(Points),
+  row.names = NULL
+)
+
+for (i in 1:nrow(Points)){
+  result_statistics$StdDev[i] <- sqrt(sum((Points[i,]-result_statistics$Mean[[i]])^2/(length(Points[i,])-1)))
+}
+result_statistics$CI <- qnorm(0.975)*result_statistics$StdDev/sqrt(length(Points[i,]))
+result_statistics <- result_statistics[order(-result_statistics$Mean),]
+result_statistics$Position <- seq(1,length(result_statistics$Team), by=1)
+result_statistics
+```
+
