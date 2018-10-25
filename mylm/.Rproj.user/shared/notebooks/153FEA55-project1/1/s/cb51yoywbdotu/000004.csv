@@ -1,0 +1,3 @@
+"0","# some R code for part 1a)"
+"0","library(GGally)"
+"0","ggpairs(SLID, lower = list(combo = wrap(ggally_facethist, binwidth = 0.5)))"

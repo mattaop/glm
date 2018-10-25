@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1537795427743.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1040067452",
+    "id" : "FF0ADC84",
+    "lastKnownWriteTime" : 1538082158,
+    "last_content_update" : 1538082158037,
+    "path" : "~/R/glm/mylm/R/mylm.r",
+    "project_path" : "R/mylm.r",
+    "properties" : {
+        "cursorPosition" : "21,38",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

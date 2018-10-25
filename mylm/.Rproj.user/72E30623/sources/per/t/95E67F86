@@ -1,0 +1,23 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1537795419148.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "68660410",
+    "id" : "95E67F86",
+    "lastKnownWriteTime" : 1538094240,
+    "last_content_update" : 1538094240243,
+    "path" : "~/R/glm/mylm/project1.Rmd",
+    "project_path" : "project1.Rmd",
+    "properties" : {
+        "cursorPosition" : "86,3",
+        "last_setup_crc32" : "",
+        "scrollLine" : "80"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

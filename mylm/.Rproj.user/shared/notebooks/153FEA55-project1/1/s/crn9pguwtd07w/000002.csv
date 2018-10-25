@@ -1,0 +1,3 @@
+"0","library(car)"
+"0","data(SLID, package = ""carData"")"
+"0","SLID <- SLID[complete.cases(SLID), ]"

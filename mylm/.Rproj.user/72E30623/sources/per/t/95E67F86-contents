@@ -1,0 +1,209 @@
+---
+output:
+  pdf_document: 
+    latex_engine: xelatex
+  html_document: default
+---
+
+--- 
+title: "TMA4315: Compulsory exercise 1" 
+subtitle: "Group 4: Adrian Bruland og Mathias Opland" 
+date: "`r format(Sys.time(), '%d.%m.%Y')`" # the current date, can be regular text as well
+output: # 3rd letter intentation hierarchy
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 2
+  # pdf_document:
+  #  toc: false
+  #  toc_depth: 2
+
+---
+
+```{r setup, include = FALSE}
+library(formatR)
+showsol <- FALSE
+library(knitr)
+opts_chunk$set(tidy.opts = list(width.cutoff = 68), tidy = TRUE, warning = FALSE, error = FALSE, message = FALSE, echo = TRUE)
+```
+
+# Part 1
+
+
+
+## a)
+
+```{r, include=FALSE}
+library(car)
+data(SLID, package = "carData")
+SLID <- SLID[complete.cases(SLID), ]
+
+```
+
+```{r}
+library(GGally)
+ggpairs(SLID, lower = list(combo = wrap(ggally_facethist, binwidth = 0.5)))
+```
+
+From the top row we can see that the wage variable shows a noticeable correlation with education, age and sex. Language on the other hand doesn't seem to have a large impact on the wages. One can see that people with high level (20) of education are distributed over the whole span of wages, but low educated people are centred around low wages, with very few or none at high level of wages.
+
+The age correlates to wages in that there are people from all age categories that have low wages, but that people are more likely to have a higher wage around age 40. Visually, it seems that the average wage decreases with every age bracket above 40, such that those aged 60 have a lower average wage than 50-year-olds, and so forth. The correlation is posivite and substantial, so the overall trend is that higher age correlates to higher wages. There is a correlation between age and education, in that the education level decreases as the age increases. It is a known fact that the average education level have increased over the last 50 years, which correlates with the data set. 
+
+As for the sex variable, males have a somewhat higher median wage, and the first and third wage quartiles in males are respectively higher than those in females. The wage outliers among males also tend to earn more than those in females, suggesting that that the upper few percents of earners will tend to be male.
+
+First we assume that there is a linear relationship between the covariates, ie. the relationship can be expressed as:
+
+
+$$\bf{Y} = \bf{X} \bf{\beta} + \bf{\varepsilon}$$
+
+In order to perform a multiple linear regression analysis, we must make the following assumptions:
+First, the response, which is wage, is a linear combination of the covariates, and errors are additive onto the linear combination, i.e. $\bf{Y} = \bf{X} \bf{\beta} + \bf{\varepsilon}$. Second, that we have homoscedastic error variance and uncorrelated errors, i.e. $Cov(\epsilon)=\sigma^2\bf{I}$, $Cov(\epsilon_i,\epsilon_j)=0$. For this model, this means that along age, sex, language and education, the variance in wage is the same for any observation, or set of observations.
+
+In addition, the model must be a "normal model" (cf. Module 2 in the course) in order for us to perform linear regression. In a normal linear model, we assume that the errors are independent and normally distributed, with the same variance for all errors: $\bf{\varepsilon} \sim N_n(0,\sigma^2I)$. 
+
+
+# Part 2
+
+**a)**
+Here is a print of the mylm-package and the built-in lm-package.
+```{r}
+library(mylm)
+model1 <- mylm(wages ~ education, data = SLID)
+print(model1)
+model1b <- lm(wages ~ education, data = SLID)
+print(model1b)
+```
+As shown, the two packages produces the same information when using the print-function. The result is a linear regression with wage as response, and education as the only covariate.
+
+**b)**
+Here is a print out of tha covariance matrix defined as:
+$$\Sigma = E\Big[(X-E[X])(X-E[X])^T\Big] = \frac{1}{n}\Big(\sum_{i=1}^{n}(Y_i - \hat Y_i)\Big)(X^TX)^{-1}$$
+```{r}
+print.default(model1$covariance_matrix)
+```
+```{r}
+summary(model1)
+summary(model1b)
+```
+The intercept estimate as shown in the print out is 4.97169 and the estimated standard error is 0.53429. The intercept can be interpreted as the expected wage when one have no edjucation, but as shown in the plot in task 1, there is none or very few that has under 5 years of edjucation, and few that has under 10 years of edjucation. Thus the regression will not be very informative when under 5 years of edjucation, as the regression is based on very little or none data from under this value. The value of the coefficient estimate for edjucation 0.79231 and the estimated standard error is 0.03906. Thus the regression propose that for each year of edjucation, the composite hourly wage rate will increase by approxomatly 0.79 dollars (The documentation of the SLID data set doesn't say anything about currency for the data, so based on the numbers we get and the fact that the publisher of the data set is canadian, we guess that the data is given in Canadian or US dollar).
+
+Using a Z-test, we get:
+$$ P(Z \leq z)=2 \cdot \Phi(-|Z|), \hspace{1cm} Z=\frac{x-\mu}{\sigma} $$
+Here we use that the normal distribution is two-sided, but we also normalize the data with mean $\mu = 0$ and variance $\sigma = 1$. Thus we know that we only have to look at one side of the distribution, and multiply by two afterwards. 
+In our case, the $H_0$ hypotheses is that $\mu$ is zeros, and thus we get $Z=x/ \sigma$:
+```{r, echo=FALSE}
+cat("Z-values for the regression coefficients: ")
+print.default(model1$z_value)
+```
+Computing the p-values are done by the integral
+$$P(Z \leq z) = \frac{1}{\sqrt{2 \pi}} \int_{-\infty}^{z} e^{-t^2}dt,$$
+but as it is not analytic solvable for a unknown $z$, we use the built-in function pnorm, which gives the values:
+```{r, echo=FALSE}
+cat("P-values for the regression coefficients: ")
+print.default(model1$p_value)
+```
+This suggests that both the intercept and the regression coefficients are significant. The usual level to determen if a coefficient is siginficant or not is a 95%-confidence interval where $P(Z \leq z) < 0.05$. If true, the parameter in question is significant at a 5%-level, which both our parameters are in this case.
+**c)**
+```{r}
+library(ggplot2)
+plot(model1)
+plot(model1b, which = c(1))
+```
+The plot shows the residuals plotted against the fitted values. A residual plot shows if the linear regression is appropriate for the data. A random distribution around the horisontal-axis suggest that there is no systematical error in the regression, and that a linear regression is appropriate. On the other side, if the residuals follow a systematix distribution around the horisontal-axis, there is likely that the relationship between the covariates and the response is non-linear. In this plot we can see that the points lies closer to zero at at the start of the x-axis, and as we move along, the points spread out more. However there is also a lot more points as we moce along the x-axis, which explains why some of the points also lies further from zeros. On the other hand, we can see that the points seem to lie much closer under the zero line, and that there is much more spread out on above zero. This is not a random pattern, and lead us to the conclusion that the regression is not a very good fit for the datapoints. From this plot we think that there is easier to predict some sort of minimum wage given a certain education level, but above this wage-level there is more variance, and therefore not as defined maximum wage-level given a edjucation level.
+
+**d)**
+
+* The residual sum of squares (SSE) for this model is computed as: $SSE = \sum_{i=1}^{n} \epsilon_i^2$ where $\epsilon_i = (I-H)Y$. 
+```{r, echo = FALSE}
+cat("SSE: ")
+print.default(model1$sse)
+```
+In this case The degrees of freedom for this model is the number of dimesions that are free, which can be expressed by $df = n-p-1$, where n is the number of datapoints (in this caes 3987) and p is the number of explanatory parameters (in this case 1). Thus $df = 3985$.
+
+* The total sum of squares (SST) is $\sum_{i=1}^{n}(Y - \bar(Y))^2$:
+```{r, echo = FALSE}
+cat("SST: ")
+print.default(model1$sst)
+```
+The $\chi^2$-statistics is computed by $\chi_r^2 = r \cdot \frac{SST-SSE}{SSE}$, which gives:
+```{r, echo=FALSE}
+cat("Chi-squared statistics from mylm-package: ")
+chi_squared <-  model1$degrees_of_freedom*(model1$sst - model1$sse)/model1$sse
+print(chi_squared)
+cat("Chi-squared p-value: ")
+pchisq(chi_squared, 1, lower.tail = FALSE)
+cat("\nF-statistics from lm-package: ")
+summary(model1b)$fstatistic[1]
+cat("F-statistics p-value: ")
+anova(model1b)$"Pr(>F)"[1]
+```
+The F-distribution is asymptotic, and will close in on the $\chi^2$ as the number of observations gets higher: $r \cdot F_{r,n} \xrightarrow{n \to \infty} \chi_r^2$. Here we can see that we get a answer close to the lm F-statistics, which is expected with a so high number of data. We are using r = 1 in this computation, since that is the number of regression coefficients.
+
+* In a simple linear regression, the $\chi^2$-test and the z-test wil describe the same thing, as the $\chi^2$-test checks the significance of all the covariates together. In other words, the $\chi^2$-test checks the significance of the regression. The z-test on the other hand checks the significance of each of the covariates. Thus they will in a simple linear regression check the significancy of the covariate, and ultimately test the same thing, but if there is more than one, they will differ. However they have different methods of finding the p-value, as the z-test uses the normal distribution, and $\chi^2$-test uses the $chi^2$ distribution. This gives us in a 95% confidence interval the critical z-value:
+```{r, echo=FALSE}
+cat("Critical z-value: ")
+critical_z <- qnorm(.05/2,lower.tail=FALSE)
+critical_z
+cat("Critical chi-squared value: ")
+cricical_chi <- qchisq(.05, 1, lower.tail=FALSE)
+cricical_chi
+```
+We are dividing 0.05 by 2 in the computation of the critical z-value as the distribution is two tailed, with each tail being 0.025 each. The $\chi^2$ distribution on the other hand is not two tailed, and thus we are using 0.05.
+**e)**
+The coefficient of determination $R^2$ is computed $R^2 = SSR/SST = 1 - SSE/SST$, where SSR/SST can be interpreted as how much of the total variability in the data (SST) is described by the regression (SSR). We want the regression to describe the variability in the data, and thus a $R^2$-value as close to 1 as possible is desired ($0 \leq R^2 \leq 1$). In a simple linear regression, $R^2$ is the squared correlation coefficient between the response and the predictor (in this case wage and education*$\hat \beta$), and for multiple linear regression $R^2$ is the squared correlation coefficient between the response and the predicted response. The value for our model is: 
+```{r, echo = FALSE}
+cat("R-squared: ")
+print.default(model1$R_squared)
+```
+This value is not very good, and suggests that education alone is not a very good predictor for the wage, and that it doesn't desctibe the variability in the data.
+
+
+# Part 3
+
+**a)**
+```{r}
+library(mylm)
+model2 <- mylm(wages ~ education + age, data = SLID)
+print(model2)
+```
+
+**b)**
+```{r}
+summary(model2)
+```
+
+**c)**
+```{r}
+model2a <- mylm(wages ~ education, data = SLID)
+model2b <- mylm(wages ~ age, data = SLID)
+summary(model2a)
+summary(model2b)
+```
+
+# Part 4
+```{r}
+SLID$languageRELEVEL <- relevel(SLID$language, ref = "Other")
+library(mylm)
+model3 <- mylm(wages ~ sex + age + languageRELEVEL + I(education^2), data = SLID)
+model3b <-  lm(wages ~ sex + age + languageRELEVEL + I(education^2), data = SLID)
+print(model3)
+print(model3b)
+```
+
+
+```{r}
+library(mylm)
+model4 <- mylm(wages ~ language + age + language*age, data = SLID)
+model4b <-  lm(wages ~ language + age + language*age, data = SLID)
+print(model4)
+print(model4b)
+```
+
+```{r}
+library(mylm)
+model5 <- mylm(wages ~ education - 1, data = SLID)
+model5b <-  lm(wages ~ education - 1, data = SLID)
+print(model5)
+print(model5b)
+```
+

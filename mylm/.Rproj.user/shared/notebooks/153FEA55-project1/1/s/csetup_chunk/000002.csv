@@ -1,0 +1,4 @@
+"0","library(formatR)"
+"0","showsol <- FALSE"
+"0","library(knitr)"
+"0","opts_chunk$set(tidy.opts = list(width.cutoff = 68), tidy = TRUE, warning = FALSE, error = FALSE, message = FALSE, echo = TRUE)"
