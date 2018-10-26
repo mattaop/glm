@@ -1,5 +1,5 @@
 --- 
-title: 'TMA4315: Compulsory exercise 2 (title)'
+title: 'TMA4315: Compulsory exercise 2: Logistic regression and Poisson regression'
 output:
   pdf_document:
     toc: yes
@@ -9,7 +9,7 @@ output:
     toc_depth: 2
     toc_float: yes
 date: "`r format(Sys.time(), '%d.%m.%Y')`"
-subtitle: 'Group 0: Name1, Name2 (subtitle)'
+subtitle: 'Group 14: Adrian Bruland, Mathias Opland'
 ---
 
 ```{r setup, include = FALSE}
@@ -95,7 +95,7 @@ Here is a the table ordered after points, where GF is goales scored, GA is goals
 ## c
 ```{r}
 # This code generates the design matrix, as well as computing the strength parameters 
-# with our own function, as well as the built in glm function for comparison. 
+# with our own function.
 library(myglm)
 goals <- c(eliteserie$yh, eliteserie$ya)
 X <- matrix(data = 0, nrow = 384, ncol = 17)
@@ -119,11 +119,6 @@ strength_param <- myglm(goals ~ -1 + X)
 strength_param <- strength_param[order(-strength_param)]
 names(strength_param) <- substring(names(strength_param), 2)
 strength_param
-
-glm_strength_param <- glm(goals ~ -1 + X, family = "poisson")$coefficients
-#glm_strength_param <- glm_strength_param[order(-glm_strength_param)]
-#glm_strength_param
-
 ```
 Here we see the estimated strength-parameters, with the stength parameter of BodoeGlimt set to zero. The expexted number of goals for a home team A is thus $E[A]=exp(\beta_0+\beta_{home}+\beta_{A} -\beta_{B})$ and the away team B has the expected value $E[B]=exp(\beta_0+\beta_{B}-\beta_{A})$. We see that the intercept is some sort of "default" strength for BodoeGlimt, and if a BodoeGlimt play away against a team with higher strength parameter than the intercept, they would have a expected number of goals less than 1 (the sum of the betas less than zero). Rewriting as $E[A] = e^{\beta_0} e^{\beta_{home}} e^{\beta_{A} }/e^{\beta_{B}})$ we can more easily see that the expected number of goals for a team is e in the power of the intercept, times e in the power of the home parameter (if a home game for the team), times the e to the power of the strength parameter of the team, divided by e to the power of the strength parameter of the opponent. An interesting point is that Molde has a higher strength parameter than Brann, even though Brann has 5 more points so far in the season. That can be a result of Molde meeting better opponents than Brann so far, and the fact that Molde won both the matches between the teams, with 5-1 home and 0-4 away. Ranheim TF had a much lower strength parameter than there position in the table suggests. Looking at their played games, one can see that they are very unstable, loosing to teams that are considered worse, and winning against better teams. Thus it's hard to analyse their strength, and give it a number. The regression has probably considered some of their wins against better teams like Molde luck, which would explain the pessimistic strength estimate.
 ```{r, eval=FALSE}
@@ -180,7 +175,7 @@ Positions <- melt(Positions, id.vars = c("Teams"))
 p <- ggplot(data = data.frame(Positions), aes(x=value))+geom_bar() + facet_wrap(~Var1)
 p
 ```
-From this bar diagrams over the different simulations, we can see that Rosenborg wins around 900/1000 simulations, whereas Brann wins the remaining around 100 simulations. Molde wins about 2 or 3 of the simulations, but Rosenbord and Brann are mainly our contestants for the win. The omission of explanatory variables such as Rosenborg are playing Europe League in addition to Eliteserien, and their players will be more exhausted, can cause for a lower variability in the data than we see in our simulations. There are much more variability in the middel of the table, which suggests that the three to teams (Rosenborg and Brann) are a lot better than the others, and Sandefjord being the worst (8 points behind the next team on the table so far).
+From this bar diagrams over the different simulations, we can see that Rosenborg wins around 900/1000 simulations, whereas Brann wins the remaining around 100 simulations. Molde wins about 2 or 3 of the simulations, but Rosenbord and Brann are mainly our contestants for the win. The omission of explanatory variables such as Rosenborg are playing Europe League in addition to Eliteserien, and their players will be more exhausted, can cause for a lower variability in the data than we see in our simulations. There are much more variability in the middel of the table, which suggests that the three to teams (Rosenborg and Brann) are a lot better than the others, and Sandefjord being the worst (8 points behind the next team on the table so far). Another point to make is that this regression only set a general value on each teams strength, but following football results one knows that some teams perform better against other specific teams and vice versa. This regression only estimates the general strength of Rosenborg compared to all the other teams, but for a more realistic simulation one would have to estimate the strength difference between each team spesifically.
 ```{r}
 #This code computes result statistics such as mean and standard deviation
 result_statistics <- data.frame(
@@ -193,9 +188,46 @@ result_statistics <- data.frame(
 for (i in 1:nrow(Points)){
   result_statistics$StdDev[i] <- sqrt(sum((Points[i,]-result_statistics$Mean[[i]])^2/(length(Points[i,])-1)))
 }
-#result_statistics$CI <- qnorm(0.975)*result_statistics$StdDev/sqrt(length(Points[i,]))
 result_statistics <- result_statistics[order(-result_statistics$Mean),]
 result_statistics$Position <- seq(1,length(result_statistics$Team), by=1)
 result_statistics
 ```
-Looking at the means, there is a considerable difference in points between Rosenborg and Brann, at 5.774 points. However, the standard deviations for the teams will suggest that if Rosenborg being close to the lower limit and Brann close to the upper limit, would give Brann more points. If one also take into acount that they are playing against each other in the final part of the season, not only giving the winner three points, but also ensures that the looser gets zero points, we have plausible scenarios where Brann wins Eliteserien. As shown in our simulations, they only win around 100/1000, but the match between the two teams will be crucial in the first place battle. 
+Looking at the means, there is a considerable difference in points between Rosenborg and Brann, at 5.774 points. However, the standard deviations for the teams will suggest that if Rosenborg being close to the lower limit and Brann close to the upper limit, would give Brann more points than Rosenborg. If one also take into acount that they are playing against each other in the final part of the season, not only giving the winner three points, but also ensures that the looser gets zero points in that game, we have plausible scenarios where Brann wins Eliteserien. As shown in our simulations, they only win around 100/1000, but the match between the two teams will be crucial in the first place battle. 
+
+
+```{r, eval=FALSE}
+# Code from myglm-package
+myglm <- function(formula, data = list(), contrasts = NULL, ...){
+  # Extract model matrix & responses
+  mf <- model.frame(formula = formula, data = data)
+  X  <- model.matrix(attr(mf, "terms"), data = mf, contrasts.arg = contrasts)
+  y  <- model.response(mf)
+  terms <- attr(mf, "terms")
+
+  # Add code here to calculate coefficients, residuals, fitted values, etc...
+  # and store the results in the list est
+  est <- list(terms = terms, model = mf)
+
+  par <- rep(0, ncol(X))
+  betahat <- optim(par=par, fn=loglik_poi, x=X, y=y, method = "BFGS")$par
+  names(betahat) = colnames(X)
+  est$beta <- betahat
+  
+  # Store call and formula used
+  est$call <- match.call()
+  est$formula <- formula
+
+  # Set class name. This is very important!
+  class(est) <- 'myglm'
+  # Return the object with all results
+  return(est$beta)
+}
+
+loglik_poi <- function(par, x, y){
+  beta <- par
+  mu <- beta%*%t(x)
+  LL <- sum(y*mu-exp(mu))
+  return(-LL)
+}
+
+```

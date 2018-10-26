@@ -90,8 +90,6 @@ anova.myglm <- function(object, ...){
 # it is common to include all other necessary arguments in a list called "args", but this can be done other ways as well
 loglik_poi <- function(par, x, y){
   beta <- par
-  n <- nrow(y)
-  lambda <- exp(beta%*%t(x))
   mu <- beta%*%t(x)
   LL <- sum(y*mu-exp(mu))
   return(-LL)
