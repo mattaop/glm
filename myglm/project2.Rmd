@@ -19,6 +19,234 @@ library(knitr)
 opts_chunk$set(tidy.opts = list(width.cutoff = 68), tidy = TRUE, warning = FALSE, error = FALSE, message = FALSE, echo = TRUE)
 ```
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Part 1
+
+1a) $\hspace{.5cm}$ For logistic regression with grouped data, the log-likelihood function is 
+
+$$\ell(\beta)=\ln(L(\beta))=\sum_{i=1}^G (y_i\textbf{x}_i^T\beta - \textbf{x}_i^T\beta\ln(1+\exp(\textbf{x}_i^T\beta))$$
+
+
+where $\textbf{x}_i$ is the $p$-vector whose elements are 1 followed by the $k$ covariate values for observation $i$ and $G$ is the number of groups. As usual, $\beta$ is the vector of regression parameters to be found.
+
+In practice, in order to get the maximum likelihood estimates, we plug the observations $(y_i,\textbf{x}_i)$ for $i=1,...,n$, into the derivative of $\ell$ with respect to $\beta$, called the score function 
+
+$$s(\beta)=\sum_{i=1}^n\frac{\partial\ell_i(\beta)}{\partial\beta}=\sum_{i=1}^n\textbf{x}_i(y_i-n_i\pi_i)=\sum_{i=1}^n\textbf{x}_i\Big(y_i-\textbf{x}_i\beta\frac{\exp(\textbf{x}_i\beta)}{1+\exp(\textbf{x}_i\beta)}\Big)$$.
+
+
+This is a non-linear system of equation - set it equal to 0 and solve numerically, by the Newton-Raphson method or the Fisher scoring method.
+
+
+
+1b)
+Fit the model
+``` {r loaddata, echo=FALSE}
+
+filepath <- "https://www.math.ntnu.no/emner/TMA4315/2018h/mountains"
+mount <- read.table(file = filepath, header = TRUE, col.names = c("height",
+    "prominence", "fail", "success"))
+#print(mount)
+mylogit<-glm(cbind(success, fail) ~ height + prominence, data = mount, family = "binomial")
+summary(mylogit)
+coeffs<-(mylogit$coefficients)
+sigma<-vcov(mylogit)
+#print(coeffs)
+#print(sigma)
+```
+
+
+The regression parameters $\beta_i$ are interpretted respectively as the "log odds" (natural logarithm of the odds) when height and prominence are zero, the log of the factor by which the odds will be multiplied if height increases by one unit, and the analagous log-factor for prominence. Here $\beta_1=\beta_{\text{height}}$ and $\beta_2=\beta_{\text{prominence}}$ are negative, so an increase in height or prominence will, according to the model, yield a decrease in success odds.
+
+
+The exponential function with the coeffients as input gives
+```{r,echo=FALSE,eval=TRUE}
+mylogit<-glm(cbind(success, fail) ~ height + prominence, data = mount, family = "binomial")
+
+exp(mylogit$coefficients)
+```
+
+demonstrating that the odds will decrease as height and prominence increase, since the odds will be mulitplied by a factor between 0 and 1.
+
+Significance: since the Wald test statistic is the square of the z-test statistic, we can look at the glm summary and look at the p-values, which are below 0.03112, so the covariates are both significant.
+
+
+
+
+Confidence Intervals:
+``` {r CI, echo=FALSE}
+#mylogit<-glm(cbind(success, fail) ~ height + prominence, data = mount, family = "binomial")
+#coeff=mylogit$coefficients
+#sds=sqrt(diag(summary(mylogit)$cov.scaled))
+#alpha=.05
+#lower=coeff-qnorm(1-alpha/2)*sds
+#upper=coeff+qnorm(1-alpha/2)*sds
+#cbind(lower['height'],upper['height'])            CI for beta
+#cbind(exp(lower['height']),exp(upper['height']))        # CI for exp(beta)
+
+
+
+```
+
+Choosing the standard significance level of $\alpha=.05$, the confidence level is 95%, and the respective confidence interval is 
+$$ P\Bigg(\hat{\beta_{1}}-z_{\alpha/2}\sqrt{a_{jj}(\boldsymbol{\hat{\beta}})} \leq \beta_{1} \leq \hat{\beta_{1}}+z_{\alpha/2}\sqrt{a_{jj}(\boldsymbol{\hat{\beta}})}\Bigg)=0.95 $$
+
+ Calculate the confidence interval for height covariate $\beta_1$ (lower and upper shown here):
+ 
+```{r,echo=FALSE,eval=TRUE} 
+#Confidence interval
+#Parameter estimates
+coeff = mylogit$coefficients
+#Diagonal of covariance matrix
+sds = sqrt(diag(summary(mylogit)$cov.scaled))
+alpha = 0.05
+#Lower limit of confidence interval
+lower = coeff - qnorm(1 - alpha/2) * sds
+#Upper limit of confidence interval
+upper = coeff + qnorm(1 - alpha/2) * sds
+#Confidence interval
+confint <- cbind(lower['height'], upper['height'])
+confint
+```
+
+Find the confidence level for $\exp{(\beta_1)}$:
+
+```{r,echo=FALSE,eval=TRUE} 
+#Confidence interval
+#Parameter estimates
+exp(confint)
+```
+
+There is a 95% probability that increasing the height covariate by one unit will change the odds of successfully scaling a mountain by a factor in the $\exp{(\beta_1)}$-interval given above, which will constitute a decrease, althought not by much. One more meter of height isn't that much of a challenge, but a much higher mountain will prove substantially more difficult.
+
+
+1c)
+Plot the deviance residuals as a function of the two covariates, separately.
+
+```{r,echo=FALSE,eval=TRUE} 
+plot(mount$height,residuals(mylogit,type="deviance"),xlab="Height",ylab="Deviance residuals",main="Deviance residuals - height")
+```
+
+```{r,echo=FALSE,eval=TRUE} 
+plot(mount$prominence,residuals(mylogit,type="deviance"),xlab="Prominence",ylab="Deviance residuals",main="Deviance residuals - prominence")
+```
+
+Both plots seem to show some clustering above the zero deviance residual line, particularly for smaller values in the top left corner. This suggests that for the mountains in the data set whose height/prominence is lower, the odds of success is greater than what the logit model tells us. However, there are a few outliers whose observed success rate is a lot lower than that predicted by the model, explaining why the model failed to predict the high odds of success for the other low-height or low-prominence mountains. The variance looks to be higher for the mountians lower height and/or prominence.
+
+
+For the logit model, the deviance test is
+$$ D =  2\sum_{j=1}^G \bigg[y_j\ln(\frac{y_j}{n_j\hat{\pi}_j})+(n_j-y_j)\ln\Big(\frac{n_j-y_j}{n_j-n_j\hat{\pi}_j}\Big)\bigg]$$
+
+which is asymptotically distributed as $\chi^{2}_{G-p}$. Use deviance test to assess model fit:
+
+```{r,echo=FALSE,eval=TRUE} 
+#Deviance
+D <- deviance(mylogit)
+D
+```
+
+Find the $p$-value, by evaluating $1-\chi^{2}_{G-p}$ for $D$: 
+```{r,echo=FALSE,eval=TRUE} 
+#p-value
+p <- dim(mount)[2]-1
+G <- dim(mount)[1]
+1 - pchisq(D, G - p)
+```
+
+With a $p$-value of zero, we conclude that the chosen logit is not a good fit.
+
+
+
+``` {r devres, echo=FALSE}
+#library(ggplot2)   gammel kode
+#plotDResVSRegressor1<-data.frame(dres = mylogit$residuals, covariate = )
+#res<-residuals(mylogit, type="deviance",echo=FALSE)
+#plot(res)
+
+```
+
+
+
+Next, we plot the estimated probabilities of successfully climbing a mountain in the covariate range of the logit model
+
+
+``` {r 3Dplot, echo=FALSE}
+library(ggplot2)
+plot3DMat<-matrix(NA,nrow=max(mount$height)-min(mount$height)+1,ncol=max(mount$prominence)-min(mount$prominence)+1)
+df<-data.frame()
+
+height<-seq(max(mount$height), min(mount$height), length.out = 100)
+
+prominence<-seq(max(mount$prominence), min(mount$prominence), length.out = 100)
+
+
+for (i in height) {
+  for (j in prominence){
+    x<-c(1,i,j)%*%mylogit$coefficients
+    #print(x)
+    nyrad <- data.frame(i,j,exp(x)/(1+exp(x)))
+    #print(nyrad)
+    df <- rbind(df, nyrad)
+    
+  }
+}
+names(df) <- c("Height", "Prominence", "successProb")
+#head(df)
+
+ggplot(data=df, mapping=aes(x=Height, y=Prominence, z=successProb)) + geom_raster(aes(fill=successProb)) + geom_contour(aes(z=successProb))
+#geom_raster(aes(fill = 1e-04 * mylogit))
+
+```
+
+As expected, the logit model graph shows a decrease in success probability with increasing height and prominence. The contour lines show that one unit of height can be traded off for about 3 units of prominence while keeping success probability stable. This means that height has a more adverse effect on success probability than prominence. This may be explained by the fact that a substantially higher altitude tends to give more adverse weather conditions, lack of oxygen, stronger winds and so forth.
+
+
+1d)
+Mount Everest:
+According to the model, the probability of getting to the top of Mount Everest is
+
+``` {r MountEv, }
+
+x <- c(1,8848,8848)%*%mylogit$coefficients
+mesuc <- exp(x)/(1+exp(x))
+
+print(mEverestSuc)
+```
+
+
+
+We know that $\hat\beta$ has a normal distribution asymptotically
+
+$$\hat\beta \sim N_p(\beta, F^{-1}(\hat\beta))$$
+where $F$ is the Expected Fisher information matrix.
+The estimate of the linear predictor for mount everest is $\hat{\eta} = x^T\hat{\beta}.$ Since $x_{*}^T$ is just a constant vector of covariate values, $\hat\eta_{*}$ is also normally distributed. The expected value and variance of $\hat{\eta}$ are given as
+
+$$E(\hat{\eta}) = x^TE(\hat{\beta}) = x^T\beta = \eta$$
+$$Var(\hat{\eta}) = x^TVar(\hat{\beta})x = x^TF^{-1}(\hat{\beta})x$$
+
+
+The $(1-\alpha)\%$-confidence interval for $\eta$ is 
+
+
+$$[\hat\eta_{l},\hat\eta_{u}] = \left[\hat\eta-1.96\sqrt{x^TF^{-1}(\hat\beta)x}, \hat\eta+1.96\sqrt{x^TF^{-1}(\hat\beta)x}\right].$$ 
+
+
+
+
+
+Transform this interval into an interval for the likelihood for successfully scaling Mount Everest:
+$$[\hat\pi_l, \hat\pi_u] = \left[\frac{\exp{\hat\eta_l}}{1+\exp{\hat\eta_l}}, \frac{\exp{\hat\eta_u}}{1+\exp{\hat\eta_u}} \right]$$
+
+
+We couldn't get the confidence interval code right, but we guess that the model doesn't fit Mount Everest too well, since it's well outside the dataset in terms of height. As the height increases, the probability of success will eventually get to zero and below. A negative probability makes no sense, so the model is clearly limited in scope.
+
+
+
+
+
+
 
 # Part 2
 ## a)
