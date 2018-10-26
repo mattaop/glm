@@ -207,12 +207,12 @@ As expected, the logit model graph shows a decrease in success probability with 
 Mount Everest:
 According to the model, the probability of getting to the top of Mount Everest is
 
-``` {r MountEv, }
+``` {r MountEv, echo=FALSE}
 
 x <- c(1,8848,8848)%*%mylogit$coefficients
 mesuc <- exp(x)/(1+exp(x))
 
-print(mEverestSuc)
+print(mesuc)
 ```
 
 
