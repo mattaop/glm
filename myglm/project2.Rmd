@@ -19,13 +19,11 @@ library(knitr)
 opts_chunk$set(tidy.opts = list(width.cutoff = 68), tidy = TRUE, warning = FALSE, error = FALSE, message = FALSE, echo = TRUE)
 ```
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
 
 # Part 1
 
-1a) $\hspace{.5cm}$ For logistic regression with grouped data, the log-likelihood function is 
+## a) 
+$\hspace{.5cm}$ For logistic regression with grouped data, the log-likelihood function is 
 
 $$\ell(\beta)=\ln(L(\beta))=\sum_{i=1}^G (y_i\textbf{x}_i^T\beta - \textbf{x}_i^T\beta\ln(1+\exp(\textbf{x}_i^T\beta))$$
 
@@ -41,7 +39,7 @@ This is a non-linear system of equation - set it equal to 0 and solve numericall
 
 
 
-1b)
+## b)
 Fit the model
 ``` {r loaddata, echo=FALSE}
 
@@ -122,7 +120,7 @@ exp(confint)
 There is a 95% probability that increasing the height covariate by one unit will change the odds of successfully scaling a mountain by a factor in the $\exp{(\beta_1)}$-interval given above, which will constitute a decrease, althought not by much. One more meter of height isn't that much of a challenge, but a much higher mountain will prove substantially more difficult.
 
 
-1c)
+## c)
 Plot the deviance residuals as a function of the two covariates, separately.
 
 ```{r,echo=FALSE,eval=TRUE} 
@@ -203,7 +201,7 @@ ggplot(data=df, mapping=aes(x=Height, y=Prominence, z=successProb)) + geom_raste
 As expected, the logit model graph shows a decrease in success probability with increasing height and prominence. The contour lines show that one unit of height can be traded off for about 3 units of prominence while keeping success probability stable. This means that height has a more adverse effect on success probability than prominence. This may be explained by the fact that a substantially higher altitude tends to give more adverse weather conditions, lack of oxygen, stronger winds and so forth.
 
 
-1d)
+## d)
 Mount Everest:
 According to the model, the probability of getting to the top of Mount Everest is
 
