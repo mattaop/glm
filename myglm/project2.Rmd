@@ -14,8 +14,8 @@ subtitle: 'Group 14: Adrian Bruland, Mathias Opland'
 
 ```{r setup, include = FALSE}
 library(formatR)
-showsol <- FALSE
 library(knitr)
+showsol <- FALSE
 opts_chunk$set(tidy.opts = list(width.cutoff = 68), tidy = TRUE, warning = FALSE, error = FALSE, message = FALSE, echo = TRUE)
 ```
 
@@ -23,7 +23,7 @@ opts_chunk$set(tidy.opts = list(width.cutoff = 68), tidy = TRUE, warning = FALSE
 # Part 1
 
 ## a) 
-$\hspace{.5cm}$ For logistic regression with grouped data, the log-likelihood function is 
+For logistic regression with grouped data, the log-likelihood function is 
 
 $$\ell(\beta)=\ln(L(\beta))=\sum_{i=1}^G (y_i\textbf{x}_i^T\beta - \textbf{x}_i^T\beta\ln(1+\exp(\textbf{x}_i^T\beta))$$
 
@@ -32,7 +32,7 @@ where $\textbf{x}_i$ is the $p$-vector whose elements are 1 followed by the $k$ 
 
 In practice, in order to get the maximum likelihood estimates, we plug the observations $(y_i,\textbf{x}_i)$ for $i=1,...,n$, into the derivative of $\ell$ with respect to $\beta$, called the score function 
 
-$$s(\beta)=\sum_{i=1}^n\frac{\partial\ell_i(\beta)}{\partial\beta}=\sum_{i=1}^n\textbf{x}_i(y_i-n_i\pi_i)=\sum_{i=1}^n\textbf{x}_i\Big(y_i-\textbf{x}_i\beta\frac{\exp(\textbf{x}_i\beta)}{1+\exp(\textbf{x}_i\beta)}\Big)$$.
+$$s(\beta)=\sum_{i=1}^n\frac{\partial\ell_i(\beta)}{\partial\beta}=\sum_{i=1}^n\textbf{x}_i(y_i-n_i\pi_i)=\sum_{i=1}^n\textbf{x}_i\Big(y_i-\textbf{x}_i\beta\frac{\exp(\textbf{x}_i\beta)}{1+\exp(\textbf{x}_i\beta)}\Big).$$
 
 
 This is a non-linear system of equation - set it equal to 0 and solve numerically, by the Newton-Raphson method or the Fisher scoring method.

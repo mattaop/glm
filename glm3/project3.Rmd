@@ -1,0 +1,31 @@
+---
+title: "glm3"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r, echo=FALSE}
+library("GGally")
+dataset <- read.table("https://www.math.ntnu.no/emner/TMA4315/2018h/jsp2.txt",
+header = TRUE)
+ggpairs(data = dataset, mapping = aes(col = gender), columns = c("social", "raven",
+"math"), legend = 1)
+```
+
+
+The plot in the bottom right corner shows that both the math score for boys and girls are approximately normal distributed, but that girls have a mean larger than zero and that boys have a mean smaller than zero. From this we can conclude that on a general basis, girls get better math score than boys.
+```{r}
+linear_model = lm(math ~ raven + gender, data=dataset)
+summary(linear_model)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
