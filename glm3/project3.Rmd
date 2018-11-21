@@ -7,11 +7,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+## a)
 
 ```{r, echo=FALSE}
 library("GGally")
@@ -21,11 +17,35 @@ ggpairs(data = dataset, mapping = aes(col = gender), columns = c("social", "rave
 "math"), legend = 1)
 ```
 
+* The plot in the bottom right corner shows that both the math score for boys and girls are approximately normally distributed, but that girls have a mean larger than zero and that boys have a mean smaller than zero. From this we can conclude that on a general basis, girls get better math score than boys. 
 
-The plot in the bottom right corner shows that both the math score for boys and girls are approximately normal distributed, but that girls have a mean larger than zero and that boys have a mean smaller than zero. From this we can conclude that on a general basis, girls get better math score than boys.
+In the the middle bottom window, math is plotted against raven. It seems that students with a high (10) or low (-10) value on the raven test score have a higher variance on the math variable than students with a middle (0) value for raven. The data set clusters together near raven value 0, giving a substantial correlation of 0.218. The correlation is even higher if we look only at boys og girls.
+
+Judging by the univariate distributions, the subset of students that lie on the interval (-5,5) on the math variable makes up about half of the students, so it has a large impact on the math-raven correlation. On that interval, there seems to be a small, positive slope for math, which fits well with the estimated slope of .19.
+
+When breaking down math across the 4 social classes, girls have a higher average math score than the boys in every class. Class number 2 seems to be the lowest scoring class on math, by a few points, while class number 3 looks to be the highest scoring class.
+
 ```{r}
 linear_model = lm(math ~ raven + gender, data=dataset)
 summary(linear_model)
 ```
+Formula:
+$$Y_k = \bf{x}_k \beta + \epsilon_k $$
+* The $Y_k$ is the response, and tells us the expected math score for student $k$, given the covariates. The $\bf{x}_k$ is the covariate vector, and contains the given values for the student, as well as a 1 which is multiplied by the intercept estimate. In this case it is a vector with the raven test score and the gender, where girl gives 1 and boy zero. $\beta$ is then the coefficients for the covariates, and explaines how much the will affect the response. In this case there is on coefficient for the raven test, which is multiplied by the test score and one coefficient for the gender which is multiplied by either 0 or 1, and the intercept score. $\epsilon$ is the variance in the math score (response) not explained by the model, and is centered around 0, with variance $\sigma^2$. 
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+* The estimate of the intercept at -1.3131 says that given a student is a boy and has score zero at the raven test, the expected math score is -1.3131. Then the other covariates will affect the score either positively or negatively given a students values. The raven estimate says that every point will count positive on the math score with 0.1965 points. It also shows that girls will in average score 2.5381 better than boys, and with a variance of 0.2807. That means that there is a distinct difference between boys and girls in how well they do on the test, and that girls do a lot better. All the coefficients, as well as the regression is significant at 95% confidence interval, which makes us conclude that there is a correlation between the covariates and the response, as the model describes.
+
+* This model shows the correlation between the score on the raven test and the gender, with the math score. It can be used to conclude if and how there is a general difference in how well boys and girls do math, and how a students raven test score will affect their math score (not the actual raven test score, but the knowledge and skills needed for achieving the given test score).
+
+## b)
+
+$$\bf{Y}_i = \bf{X}_i \beta + \bf{1} \gamma_{0i} + \epsilon_k $$
+* Here $\bf{Y}_i$ is the response for school $i$, and will be of dimension $n_i x 1$, where $n_i$ is number of student at school $i$. $\bf{X}_i$ is the covariate matrix, and contains the covariates of all the students in school $i$. is of dimension $n_i
+```{r}
+library(lme4)
+fitRI1 <- lmer(math ~ raven + gender + (1 | school), data = dataset)
+summary(fitRI1)
+
+```
+
+
