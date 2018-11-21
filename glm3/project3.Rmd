@@ -1,6 +1,8 @@
 ---
 title: "glm3"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -40,12 +42,40 @@ $$Y_k = \bf{x}_k \beta + \epsilon_k $$
 ## b)
 
 $$\bf{Y}_i = \bf{X}_i \beta + \bf{1} \gamma_{0i} + \epsilon_k $$
-* Here $\bf{Y}_i$ is the response for school $i$, and will be of dimension $n_i x 1$, where $n_i$ is number of student at school $i$. $\bf{X}_i$ is the covariate matrix, and contains the covariates of all the students in school $i$. is of dimension $n_i
+* Here $\bf{Y}_i$ is the response for school $i$, and will be of dimension $n_i x 1$, where $n_i$ is number of student at school $i$. $\bf{X}_i$ is the covariate matrix, and contains the covariates of all the students in school $i$. The dimension of $\bf{X}_i$ is $n_i x p$, where p is the number of covariates (including intercept). $\beta$ is the coefficients, and of dimension $p x 1$. $\bf{1}$ is of dimension $n_i x 1$, and is a vector of ones. $\gamma_{0i}$ is a scalar which describes the affect a given school has on the repsonse of the students at that school, i.e. the school intercept. Thus $\bf{1}\gamma{i0}$ will be a $n_i x 1$ matrix with all entries equal to $\gamma_{0i}$. $\epsilon_i$ will as before be the error, but as we have taken into account which school a student attends, the variance in the data not described by the model may be lower. $\epsilon_i$ is of dimension $n_i x 1$.
+
+* $\gamma_{0i}$ is assumed to be distributed as $\gamma_{0i} ~ N(0, \tau^2)$, and all the elements of $\epsilon_{i}$ is assumed to be i.i.d. $N(0, \sigma^2)$.
+
+* The responses on school $i$, $\bf{Y}_i$ and school $k$, $\bf{Y}_k$ are independent, and will be equaly distributed with only a difference in the intercept of respectivly $\beta_0 + \gamma_{0i}$ and $\beta_0 + \gamma_{0k}$. 
+
 ```{r}
 library(lme4)
 fitRI1 <- lmer(math ~ raven + gender + (1 | school), data = dataset)
 summary(fitRI1)
 
 ```
+* The parameter estimates of raven and gender are pretty equal to the linear model, as which school a student attends, even though there are differences between various schools, will not affect the relationship between the covariates and the response. The estimate only describes the dependency in the model between the covariates and the response, and if there is no correlation between the covariates and which school a studen attends to (i.e. relationship between how much a certain covariate affects the respons and the school he/she attends), there will be no change. Thus there is a correlation between the intercept for the linear model and which school a student attends, so the intercept will be changed. The error may also have a lower variance as we explain more of the variance in our model.
+
+* As with the linear model each points in the raven test score will affect the math score with 0.214 points, and girls will get 2.511 more points in general. 
+
+* The model is only asymptotically, and we can only approximate the t-distribution for the parameters and the model.
 
 
+```{r}
+2*pnorm(-abs(summary(fitRI1)$coef[2,3]))
+p_value = c(summary(fitRI1)$coef[3,1] - 1.96 * summary(fitRI1)$coef[3,2], summary(fitRI1)$coef[3,1] + 1.96 * summary(fitRI1)$coef[3,2])
+p_value
+```
+## c)
+*On our model, the covariance and correlation of the math score for two students attending the same school is
+
+$$\text{Cov}(Y_{ij},Y_{il}) = \tau_0^2 \hspace{2mm}, \hspace{2mm}\text{Corr} = \frac{\tau_0^2}{\tau_0^2+\sigma^2} $$
+```{r}
+library(lme4)
+
+fitRI2 <- lmer(math ~ raven + (1 | school), data = dataset)
+summary(fitRI2)
+#summary(fitRI2)$coef
+```
+
+The correlation for model fitRI2 is 4.002/(4.002+20.711)=0.162.
