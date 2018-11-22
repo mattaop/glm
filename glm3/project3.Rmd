@@ -1,8 +1,15 @@
 ---
-title: "glm3"
+title: "Project 3:  Generalized Linear Models"
 output:
-  pdf_document: default
-  html_document: default
+  pdf_document:
+    toc: yes
+    toc_depth: '2'
+  html_document:
+    toc: yes
+    toc_depth: 2
+    toc_float: yes
+date: "`r format(Sys.time(), '%d.%m.%Y')`"
+subtitle: 'Group 17: Adrian Bruland, Mathias Opland'
 ---
 
 ```{r setup, include=FALSE}
@@ -34,7 +41,8 @@ summary(linear_model)
 ```
 Formula:
 $$Y_k = \bf{x}_k \beta + \epsilon_k $$
-* The $Y_k$ is the response, and tells us the expected math score for student $k$, given the covariates. The $\bf{x}_k$ is the covariate vector, and contains the given values for the student, as well as a 1 which is multiplied by the intercept estimate. In this case it is a vector with the raven test score and the gender, where girl gives 1 and boy zero. $\beta$ is then the coefficients for the covariates, and explaines how much the will affect the response. In this case there is on coefficient for the raven test, which is multiplied by the test score and one coefficient for the gender which is multiplied by either 0 or 1, and the intercept score. $\epsilon$ is the variance in the math score (response) not explained by the model, and is centered around 0, with variance $\sigma^2$. 
+
+* $Y_k$ is the response, and tells us the expected math score for student $k$, given the covariates. The $\bf{x}_k$ is the covariate vector, and contains the given values for the student, as well as a 1 which is multiplied by the intercept estimate. In this case it is a vector with the raven test score and the gender, where girl gives 1 and boy zero. $\beta$ is then the coefficients for the covariates, and explaines how much the will affect the response. In this case there is on coefficient for the raven test, which is multiplied by the test score and one coefficient for the gender which is multiplied by either 0 or 1, and the intercept score. $\epsilon$ is the variance in the math score (response) not explained by the model, and is centered around 0, with variance $\sigma^2$. 
 
 * The estimate of the intercept at -1.3131 says that given a student is a boy and has score zero at the raven test, the expected math score is -1.3131. Then the other covariates will affect the score either positively or negatively given a students values. The raven estimate says that every point will count positive on the math score with 0.1965 points. It also shows that girls will in average score 2.5381 better than boys, and with a variance of 0.2807. That means that there is a distinct difference between boys and girls in how well they do on the test, and that girls do a lot better. All the coefficients, as well as the regression is significant at 95% confidence interval, which makes us conclude that there is a correlation between the covariates and the response, as the model describes.
 
@@ -55,7 +63,7 @@ library(lme4)
 fitRI1 <- lmer(math ~ raven + gender + (1 | school), data = dataset)
 summary(fitRI1)
 ```
-* The parameter estimates of raven and gender are pretty equal to the linear model, as which school a student attends, even though there are differences between various schools, will not affect the relationship between the covariates and the response. The estimate only describes the dependency in the model between the covariates and the response, and if there is no correlation between the covariates and which school a studen attends to (i.e. relationship between how much a certain covariate affects the respons and the school he/she attends), there will be no change. Thus there is a correlation between the intercept for the linear model and which school a student attends, so the intercept will be changed. The error may also have a lower variance as we explain more of the variance in our model.
+* The parameter estimates of raven and gender are pretty equal to the linear model, as which school a student attends, even though there are differences between various schools, will in this case not affect the relationship between the covariates and the response. As the intercept could be looked at as a "mean" for what boys scores in math when their raven test score is zero, and since $\gamma_0$ is normal around zero we would not expect change in the intercept. As well the fixed effect does only affect the intercept and not the covariate with the raven score test (since it's not a random slope), and therefor can not affect the how the covariate raven affects the response. 
 
 * As with the linear model each points in the raven test score will affect the math score with 0.214 points, and girls will get 2.511 more points in general. 
 
@@ -68,7 +76,7 @@ p_value = c(summary(fitRI1)$coef[3,1] - 1.96 * summary(fitRI1)$coef[3,2], summar
 p_value
 ```
 ## c)
-*On our model, the covariance and correlation of the math score for two students attending the same school is
+* On our model, the covariance and correlation of the math score for two students attending the same school is
 
 $$\text{Cov}(Y_{ij},Y_{il}) = \tau_0^2 \hspace{2mm}, \hspace{2mm}\text{Corr} = \frac{\tau_0^2}{\tau_0^2+\sigma^2} $$
 ```{r}
@@ -80,6 +88,53 @@ summary(fitRI2)
 
 The correlation for model fitRI2 is 4.002/(4.002+20.711)=0.162.
 
+* The random intercept parameter $$\gamma_{0i}$$ is predicted by $$ \gamma_{0i}= \frac{n_i\hat{\tau}_0^2}{\hat{\sigma}^2 + n_i\hat{\tau}_0^2} e_i=\frac{n_i\hat{\tau}_0^2}{\hat{\sigma}^2 + n_i\hat{\tau}_0^2} \cdot\frac{1}{n_i}\sum_{j=1}^{n_i}(Y_{ij}-x_{ij}^T\hat{\beta}) $$. 
+
+Here, $n_i$ is the number of residuals (i.e. number of datapoints) in cluster $i$. The variances $\hat{\sigma}^2,\hat{\tau}_0^2$ are for random error $\varepsilon_(ij)$ and random intercept $\gamma_{0i}$. The factor $e_i$ is the average of the random errors $\varepsilon_{ij}$ for all datapoints $j$ in cluster $i$.
+
+
+```{r}
+library(ggplot2)
+library(sjPlot)
+library(ggpubr)
+library(lme4)
+gg1 <- plot_model(fitRI2, type = "diag", prnt.plot = FALSE, geom.size = 1)
+gg2 <- plot_model(fitRI2, type = "re", sort.est = "(Intercept)", y.offset = 0.4, dot.size = 1.5) +
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) + 
+  labs(title = "Random intercept (RI)", x = "school", y = "math")
+gg3 <- ggplot(data = data.frame(x = lme4::ranef(fitRI2)$school[[1]]), aes(x = x)) + geom_density() + 
+  labs(x = "math", y = "density", title = "Density of RI") +
+  stat_function(fun = dnorm, args = list(mean = 0, sd = attr(VarCorr(fitRI2)$school, "stddev")), col = "red")
+df <- data.frame(fitted = fitted(fitRI2), resid = residuals(fitRI2, scaled = TRUE))
+gg4 <- ggplot(df, aes(fitted,resid)) + geom_point(pch = 21) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_smooth(se = FALSE, col = "red", size = 0.5, method = "loess") +
+  labs(x = "Fitted values", y = "Residuals", title = "Residuals vs Fitted values")
+gg5 <- ggplot(df, aes(sample=resid)) + stat_qq(pch = 19) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dotted") +
+  labs(x = "Theoretical quantiles", y = "Standardized residuals", title = "Normal Q-Q")
+
+gg1[[2]]$school + ggtitle("QQ-plot of random intercepts")
+ggarrange(gg2, gg3, gg4, gg5)
+df <- data.frame(x = rep(range(dataset$raven), each = 49),
+                 y = coef(fitRI2)$school[,1] + coef(fitRI2)$school[,2] * rep(range(dataset$raven), each = 49),
+                 School = factor(rep(c(1:42, 44:50), times = 2)))
+ggplot(df, aes(x = x, y = y, col = School)) + geom_line() + labs(x = "raven score", y = "math score")
+
+```
+
+QQ-plot: compares the distribution of the quantiles in the ordered list of random intercepts $\gamma_{0i}$ to those of a normal distribution. Is used for telling how closely the set of random intercept resemble a normal distribution. Here, the one outlier at the low end of the $\gamma_{0i}$'s is the only substantial outlier - removing the data point may have visibly reduced the slope of the blue curve to the point that the fit onto the normal distribution would be even closer. The distribution is approximately normal, judging by the QQ-plot.
+
+Random Intercept plot: the plot can again be used to check how close the $\gamma_{0i}$ distribution is being normal, and whether there are substantial outliers in terms of predicted value and variance. Here, the some bottom outlier is found, and the graph of the mean math value resembles the CDF of the normal distribution, which is what we are looking for to confirm normal distribution in $\gamma_{0i}$.
+
+Density of RI: univariate distribution of $\gamma_{0i}$ plotted against a normal distribution $N(0,\tau_0^2)$. Can be used for checking closeness to normal distribution, in terms of mean, variance and more generally the shape of the curve. This $\gamma_{0i}$-distribution quite closely resembles the normal distribution. Removing the bottom outlier would reduce $\tau_0^2$, making the black curve taller and thinner, which would improve the fit.
+
+Residuals vs fitted values: used to check for biases (patterns in the dataset) in relation to the fitted regression, which here is a linear regression. Can also be used to find outliers. The red trend line shows some deviation from normalcy at the edges, but overall it's close fit to the normal distribution.
+
+Normal QQ-plot: a standardised version of the first plot. Benefits: mean exactly at zero, variance approximately one, and the normal distribution would fall on the line y=x. Has the same uses as QQ-plot.
+
+df-plot: here the differences in the random intercepts is clearly seen. Can be used again to check for outliers, visualise the overall distribution, as well as see how big an impact the random intercepts have on the math values. Our model predicts that attending the poorest scoring school means it's nigh impossible to achieve the lowest math scores of the highest scoring school. While there are a few outliers, most schools are normally distributed around the same linear math score curve.
+
 ## d)
 
 ```{r}
@@ -87,9 +142,9 @@ library(lme4)
 fitRI3 <- lmer(math ~ raven + social + (1 | school), data = dataset)
 anova(fitRI2, fitRI3)
 ```
-* Looking at the $\chi^2$-value and the p-value for the alternative model (fitRI3), we can abolish the $H_0$-hypothese with significance level 0.05. However the p-value is close to the significance level, so it can be usefull to use the AIC and BIC to conclude if we want to abolish the $H_0$-hypothese.
-* 
-* We se that the AIC is a little bit lower for fitRI3, which means that there is less information loss in that model. The BIC on the other hand is much lower for the fitRI2 model
+* Looking at the $\chi^2$-value and the p-value for the alternative model (fitRI3), we can abolish the $H_0$-hypothese (fitRI2 is the best model) with significance level 0.05. However the p-value is close to the significance level, so it can be usefull to use the AIC and BIC to conclude if we want to abolish the $H_0$-hypothese.
+* REML should only be used when the random effects change between the models. This is due to the fact that the REML likelihood depends on which fixed effects are in the model, and thus will change between the models. Therefore ML is prefered in this case.
+* We se that the AIC is a little bit lower for fitRI3, which means that there is less information loss in that model. The BIC on the other hand is much lower for the fitRI2 model. However together with the p-value we can conlude that fitRI3 is the best model, because 2 out of 3 test support this model as the best.
 
 ```{r}
 library(GGally)
@@ -107,4 +162,9 @@ gg2 <- plot_model(fitRIS, type = "re", sort.est = "(Intercept)", y.offset = 0.4,
 theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) + labs(title = "Random intercept (RI)")
 ggarrange(gg1, gg2, ncol = 2, legend = FALSE)
 ```
-* From the rigth plot we can see that schools with high school intercept $\gamma_{0i}$ has a lower $\beta$ for the raven test. 
+$$Y_{ij} = \beta_0 + \beta_1 x_{ij} + \gamma_{0i} + \gamma_{1i} x_{ij} + \epsilon_{ij} \\
+\bf{\epsilon}_i \sim N(\bf{0}, \sigma^2 \bf{I}), \hspace{5mm}
+\bf{\gamma}_i = \begin{pmatrix} \gamma_{0i} \\ \gamma_{1i} \end{pmatrix} \sim N \bigg(\begin{pmatrix} 0 \\ 0 \end{pmatrix} ,  \bf{Q} = \begin{pmatrix} \tau_{0}^2 & \tau_{01} \\ \tau_{01} & \tau_{1}^2  \end{pmatrix} \bigg).
+$$
+
+* From the plots we can see that schools with high school intercept, $\gamma_{0i}$, has a lower $\gamma_{1i}$ for the raven test. Thus schools with higher intercept will generaly have negativ steep slopes, where as schools with intercept close to zero will have less steep or close to zero slope, and schools with low intercept will have steep slopes.
