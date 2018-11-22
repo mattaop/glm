@@ -19,6 +19,7 @@ ggpairs(data = dataset, mapping = aes(col = gender), columns = c("social", "rave
 "math"), legend = 1)
 ```
 
+
 * The plot in the bottom right corner shows that both the math score for boys and girls are approximately normally distributed, but that girls have a mean larger than zero and that boys have a mean smaller than zero. From this we can conclude that on a general basis, girls get better math score than boys. 
 
 In the the middle bottom window, math is plotted against raven. It seems that students with a high (10) or low (-10) value on the raven test score have a higher variance on the math variable than students with a middle (0) value for raven. The data set clusters together near raven value 0, giving a substantial correlation of 0.218. The correlation is even higher if we look only at boys og girls.
@@ -42,6 +43,7 @@ $$Y_k = \bf{x}_k \beta + \epsilon_k $$
 ## b)
 
 $$\bf{Y}_i = \bf{X}_i \beta + \bf{1} \gamma_{0i} + \epsilon_k $$
+
 * Here $\bf{Y}_i$ is the response for school $i$, and will be of dimension $n_i x 1$, where $n_i$ is number of student at school $i$. $\bf{X}_i$ is the covariate matrix, and contains the covariates of all the students in school $i$. The dimension of $\bf{X}_i$ is $n_i x p$, where p is the number of covariates (including intercept). $\beta$ is the coefficients, and of dimension $p x 1$. $\bf{1}$ is of dimension $n_i x 1$, and is a vector of ones. $\gamma_{0i}$ is a scalar which describes the affect a given school has on the repsonse of the students at that school, i.e. the school intercept. Thus $\bf{1}\gamma{i0}$ will be a $n_i x 1$ matrix with all entries equal to $\gamma_{0i}$. $\epsilon_i$ will as before be the error, but as we have taken into account which school a student attends, the variance in the data not described by the model may be lower. $\epsilon_i$ is of dimension $n_i x 1$.
 
 * $\gamma_{0i}$ is assumed to be distributed as $\gamma_{0i} ~ N(0, \tau^2)$, and all the elements of $\epsilon_{i}$ is assumed to be i.i.d. $N(0, \sigma^2)$.
@@ -52,13 +54,12 @@ $$\bf{Y}_i = \bf{X}_i \beta + \bf{1} \gamma_{0i} + \epsilon_k $$
 library(lme4)
 fitRI1 <- lmer(math ~ raven + gender + (1 | school), data = dataset)
 summary(fitRI1)
-
 ```
 * The parameter estimates of raven and gender are pretty equal to the linear model, as which school a student attends, even though there are differences between various schools, will not affect the relationship between the covariates and the response. The estimate only describes the dependency in the model between the covariates and the response, and if there is no correlation between the covariates and which school a studen attends to (i.e. relationship between how much a certain covariate affects the respons and the school he/she attends), there will be no change. Thus there is a correlation between the intercept for the linear model and which school a student attends, so the intercept will be changed. The error may also have a lower variance as we explain more of the variance in our model.
 
 * As with the linear model each points in the raven test score will affect the math score with 0.214 points, and girls will get 2.511 more points in general. 
 
-* The model is only asymptotically, and we can only approximate the t-distribution for the parameters and the model.
+* $\beta$ is only asymptotically normal with an unknown degrees of freedome, and we can only approximate the t-distribution for the parameters and the model. Therefor we assume normality, and find the p-value and confidence interval.
 
 
 ```{r}
@@ -72,10 +73,38 @@ p_value
 $$\text{Cov}(Y_{ij},Y_{il}) = \tau_0^2 \hspace{2mm}, \hspace{2mm}\text{Corr} = \frac{\tau_0^2}{\tau_0^2+\sigma^2} $$
 ```{r}
 library(lme4)
-
 fitRI2 <- lmer(math ~ raven + (1 | school), data = dataset)
 summary(fitRI2)
 #summary(fitRI2)$coef
 ```
 
 The correlation for model fitRI2 is 4.002/(4.002+20.711)=0.162.
+
+## d)
+
+```{r}
+library(lme4)
+fitRI3 <- lmer(math ~ raven + social + (1 | school), data = dataset)
+anova(fitRI2, fitRI3)
+```
+* Looking at the $\chi^2$-value and the p-value for the alternative model (fitRI3), we can abolish the $H_0$-hypothese with significance level 0.05. However the p-value is close to the significance level, so it can be usefull to use the AIC and BIC to conclude if we want to abolish the $H_0$-hypothese.
+* 
+* We se that the AIC is a little bit lower for fitRI3, which means that there is less information loss in that model. The BIC on the other hand is much lower for the fitRI2 model
+
+```{r}
+library(GGally)
+library(sjPlot)
+library(lme4)
+library(ggpubr)
+fitRIS <- lmer(math ~ raven + (1 + raven | school), data = dataset)
+summary(fitRIS)
+
+df <- data.frame(x = rep(range(dataset$raven), each = 49),
+y = coef(fitRIS)$school[,1] + coef(fitRIS)$school[,2] * rep(range(dataset$raven), each = 49),
+School = factor(rep(c(1:42, 44:50), times = 2)))
+gg1 <- ggplot(df, aes(x = x, y = y, col = School)) + geom_line()
+gg2 <- plot_model(fitRIS, type = "re", sort.est = "(Intercept)", y.offset = 0.4, dot.size = 1.5) +
+theme(axis.text.y = element_blank(), axis.ticks.y = element_blank()) + labs(title = "Random intercept (RI)")
+ggarrange(gg1, gg2, ncol = 2, legend = FALSE)
+```
+* From the rigth plot we can see that schools with high school intercept $\gamma_{0i}$ has a lower $\beta$ for the raven test. 
